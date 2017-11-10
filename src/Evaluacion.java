@@ -22,8 +22,6 @@ public class Evaluacion {
         
         //PRUEBAS
         CSVReader csv = new CSVReader("Tablas-entrada/y=x+7.csv");
-        String[][] matrix;
-        matrix = csv.loadMatrix();
         
     }
     
