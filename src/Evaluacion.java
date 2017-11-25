@@ -5,7 +5,11 @@
  */
 
 import Importador.CSVReader;
+import Solution.Result;
 import java.io.FileNotFoundException;
+import net.sourceforge.jeval.EvaluationException;
+import net.sourceforge.jeval.Evaluator;
+
 
 /**
  *
@@ -22,7 +26,32 @@ public class Evaluacion {
         
         //PRUEBAS
         CSVReader csv = new CSVReader("Tablas-entrada/y=x+7.csv");
+        String[][] matrix = csv.loadMatrix();
         
+        String function = matrix[0][0];
+        String value = matrix[1][1];
+        String auxFunction = function.replace("#y=", "");
+        auxFunction = auxFunction.replace("x", value);
+        System.out.println(function);
+        System.out.println(auxFunction);
+        
+        //System.out.println(matrix.length);
+        //System.out.println(matrix[0].length);
+        Evaluator evaluator = new Evaluator();
+        try{
+            String evaluate = evaluator.evaluate(auxFunction);
+            System.out.println(evaluate);
+        }catch(EvaluationException e){
+            System.out.println(e);
+        }
+        
+        Result r = new Result(matrix);
     }
+ 
     
+    //metodo for anidados
+    
+    //estructura para comprar diferencias/ varias diferencias con el optimo
+    
+    //metodo exportar resultados
 }

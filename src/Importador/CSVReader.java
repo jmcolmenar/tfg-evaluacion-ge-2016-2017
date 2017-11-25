@@ -60,7 +60,7 @@ public class CSVReader {
         return nColumns;
     }
     
-    private String[][] loadMatrix() throws FileNotFoundException{
+    public String[][] loadMatrix() throws FileNotFoundException{
         int rows = this.numberRows();
         int columns = this.numberColumns();
         String[][] matrix = new String[rows][columns];
