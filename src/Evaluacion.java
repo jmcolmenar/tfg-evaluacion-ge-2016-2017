@@ -45,7 +45,9 @@ public class Evaluacion {
             System.out.println(e);
         }
         
-        Result r = new Result(matrix);
+        System.out.println(matrix.length);
+        
+        //Result r = new Result(matrix);
     }
  
     
