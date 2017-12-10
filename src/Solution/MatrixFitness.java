@@ -6,6 +6,8 @@
 package Solution;
 
 import java.util.Iterator;
+import net.sourceforge.jeval.EvaluationException;
+import net.sourceforge.jeval.Evaluator;
 
 /**
  *
@@ -16,13 +18,20 @@ public class MatrixFitness {
     private class Fitness{
         
         private String[] arrayFitness;
+        Evaluator evaluator;
         
         public Fitness(String[] array){
+            this.evaluator = new Evaluator();
             this.arrayFitness = array;
         }
         
-        public void evaluateFitness(){
-            //TODO evaluate one line
+        public void evaluate(String expression){
+            try{
+                evaluator.evaluate(expression);
+            }
+            catch(EvaluationException e){
+                System.out.println(e);
+            }
         }
     }
     
@@ -46,7 +55,10 @@ public class MatrixFitness {
         this.matrix = matrix;
     }
     
-    public void evaluateMatrix(){
-        //TODO iterator
+    public void evaluate(){
+        MatrixFitnessIterator it = new MatrixFitnessIterator();
+        while (it.hasNext()){
+            
+        }
     }
 }
