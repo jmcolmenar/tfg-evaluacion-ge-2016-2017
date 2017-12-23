@@ -5,7 +5,9 @@
  */
 package Solution;
 
+import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.Queue;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
 
@@ -31,15 +33,21 @@ public class MatrixFitness {
             }
             catch(EvaluationException e){
                 System.out.println(e);
-            }
+            } 
         }
     }
     
     private class MatrixFitnessIterator implements Iterator<Fitness>{
 
+        private Queue<Fitness> fitnessQueue = new ArrayDeque();
+        
+        private MatrixFitnessIterator(){
+            
+        }
+                                
         @Override
         public boolean hasNext() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return (!fitnessQueue.isEmpty());
         }
 
         @Override
