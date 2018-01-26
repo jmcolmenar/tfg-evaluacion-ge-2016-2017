@@ -5,7 +5,6 @@
  */
 
 import Importador.CSVReader;
-import Solution.Result;
 import java.io.FileNotFoundException;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
@@ -26,10 +25,14 @@ public class Evaluacion {
         
         //PRUEBAS
         CSVReader csv = new CSVReader("Tablas-entrada/y=x+7.csv");
-        String[][] matrix = csv.loadMatrix();
+        String[][] OptimumPhenotipe = csv.loadMatrix();
         
-        String function = matrix[0][0];
-        String value = matrix[1][1];
+        
+        
+        
+        /*
+        String function = OptimumPhenotipe[0][0];
+        String value = OptimumPhenotipe[1][1];
         String auxFunction = function.replace("#y=", "");
         auxFunction = auxFunction.replace("x", value);
         System.out.println(function);
@@ -45,9 +48,9 @@ public class Evaluacion {
             System.out.println(e);
         }
         
-        System.out.println(matrix.length);
+        System.out.println(OptimumPhenotipe.length);
         
-        //Result r = new Result(matrix);
+        //Result r = new Result(matrix);*/
     }
  
     
