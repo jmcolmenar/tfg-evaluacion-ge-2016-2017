@@ -29,17 +29,17 @@ public class EvaluationCofing {
         Properties conf = loadProperties();
         maxPopulationSize = Integer.parseInt(conf.getProperty("maxPopulationSize"));
         maxGenerationsdouble = Integer.parseInt(conf.getProperty("maxGenerationsdouble"));
-        probMutation = calculateProbMutation(conf.getProperty("probMutation"), problem);
+        probMutation = Double.parseDouble(conf.getProperty("probMutation"));
         probCrossover = Double.parseDouble(conf.getProperty("probCrossover"));
     }
-   
+   /*
     private double calculateProbMutation(String exp, GrammaticalEvolution problem) throws EvaluationException{
         Evaluator evaluator = new Evaluator();
         int numberOfVariables = problem.getNumberOfVariables();
         String evaluate = evaluator.evaluate(exp + "/" + numberOfVariables);
         return Double.parseDouble(evaluate);
     }
-            
+     */       
     private Properties loadProperties() throws FileNotFoundException, IOException{
         Properties config = new Properties();
         config.load(new FileInputStream(PATH));
