@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Importador;
+package Import;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,10 +27,12 @@ public class CSVReader {
         loadFile(this.csvFile);
     }
     
+    //Create object file
     private void loadFile(String path){
         file = new File(path);
     }
     
+    //Get number of Rows from a CSV file
     private int numberRows() throws FileNotFoundException{//modificar private
         int nRows = 0;
         Scanner inputStream;
@@ -45,8 +47,8 @@ public class CSVReader {
         return nRows;
     }
     
-    
-    private int numberColumns() throws FileNotFoundException{//modificar private
+    //Get number of colummns from a CVS file
+    private int numberColumns() throws FileNotFoundException{
         int nColumns = 0;
         Scanner inputStream;
         String firstLine;
@@ -60,6 +62,7 @@ public class CSVReader {
         return nColumns;
     }
     
+    //Read CVS and create a matrix with the complete information
     public String[][] loadMatrix() throws FileNotFoundException{
         int rows = this.numberRows();
         int columns = this.numberColumns();
@@ -76,41 +79,14 @@ public class CSVReader {
                 values = line.split(csvSplitBy);
                 for (int i=0;i<values.length;i++){
                     matrix[j][i] = values[i];
-                    System.out.println(values[i]);
+                    //System.out.println(values[i]);
                 }                
                 j++;
             }
         }catch(FileNotFoundException e){}  
         
         return matrix;
-    }
-    
-    private List<List<String>> load(){
-        File file = new File(csvFile);
-        
-        
-        List<List<String>> lines = new ArrayList<>();
-        Scanner inputStream;
-        String line;
-        String[] values;
-        
-        
-        try{
-            inputStream = new Scanner(file);
-            
-            while(inputStream.hasNext()){
-                line = inputStream.next();
-                values = line.split(csvSplitBy);
-                lines.add(Arrays.asList(values));
-            }
-            inputStream.close();
-                        
-        }catch (FileNotFoundException e){
-            e.printStackTrace();
-        }               
-        return lines;
-    }
-    
+    }        
 }
     
     
