@@ -5,6 +5,7 @@
  */
 package GE;
 
+import BBDD.Connector;
 import Import.CSVReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -91,7 +92,11 @@ public class GrammaticalEvolution extends AbstractProblemGE {
     }
 
     public static void main(String[] args) throws EvaluationException, IOException, Exception {
-        //Initial configuration
+       Connector con = new Connector();
+       con.connect();
+       con.close();
+
+//Initial configuration
         CommandLine cmd = startUp(args);
         //Load properties
         configuration = new EvaluationCofing();
@@ -147,7 +152,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         return cmd;
     }
     
-    //this is a test to take variables
+    //Method to get the variables
     private static HashMap<String, Integer> getVariables(String[][] phenotype){
         
         String[] lineVars = phenotype[0];

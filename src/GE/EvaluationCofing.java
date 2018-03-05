@@ -17,7 +17,7 @@ import net.sourceforge.jeval.EvaluationException;
  */
 public class EvaluationCofing {
     
-    private static final String PATH = "src/resources/config.properties";
+    private static final String PATH = "src/Resources/config.properties";
     
     private static final String NUM_OF_OBJECTIVES = "NUM_OF_OBJECTIVES";
     private static final String CHROMOSOME_LENGTH = "CHROMOSOME_LENGTH";
