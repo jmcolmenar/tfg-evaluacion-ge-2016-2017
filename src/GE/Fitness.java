@@ -38,12 +38,89 @@ public class Fitness {
         return oneDimensional;
     }
     
-    //This is a test, TODO: 
-    public double test(){
-        double totError = 0;
-        for(int i = 0; i < this.target.length; i++){
-            totError =+ Math.pow(this.target[i] - this.prediction[i], 2);
+    //Error absolute acumulated
+    public double ABSAcumulated(){
+        if (target.length != prediction.length) {
+            throw new IllegalArgumentException("array lengths are not equal");
         }
+        
+        double totError = 0.0;
+        for(int i = 0; i < this.target.length; i++)
+            totError += (this.target[i] - this.prediction[i]);
+        
         return totError;
     }
+    
+    //Mean squared error
+    public double meanSquaredError(){
+        if (target.length != prediction.length) {
+            throw new IllegalArgumentException("array lengths are not equal");
+        }
+        
+        int n = target.length;
+        double rss = 0.0;
+        for (int i= 0; i < n; i++)
+            rss += Math.sqrt(target[i] - prediction[i]);
+        
+        return rss/n;
+    }
+    
+    //Average error
+    public double averageError(){
+        if (target.length != prediction.length) {
+            throw new IllegalArgumentException("array lengths are not equal");
+        }
+        
+        int n = target.length;
+        double totError = 0.0;
+        for(int i = 0; i < n; i++)
+            totError += (this.target[i] - this.prediction[i]);
+        
+        return totError/n;
+    }
+    
+    public double r2(){
+        if (target.length != prediction.length) {
+            throw new IllegalArgumentException("array lengths are not equal");
+        }
+        
+        int n = target.length;
+        
+        // first pass
+        double sumx = 0.0, sumy = 0.0, sumx2 = 0.0;
+        for (int i = 0; i < n; i++) {
+            sumx  += prediction[i];
+            sumx2 += prediction[i] * prediction[i];
+            sumy  += target[i];
+        }
+        double xbar = sumx / n;
+        double ybar = sumy / n;
+        
+        // second pass: compute summary statistics
+        double xxbar = 0.0, yybar = 0.0, xybar = 0.0;
+        for (int i = 0; i < n; i++){
+            xxbar += (prediction[i] - xbar) * (prediction[i] - xbar);
+            yybar += (target[i] - ybar) * (target[i] - ybar);
+            xybar += (prediction[i] - xbar) * (target[i] - ybar);
+        }        
+        double slope = xybar / xxbar;
+        double intercept = ybar - slope * xbar;
+        
+        // more statistical analysis
+        double ssr = 0.0; // regression sum of squares
+        for (int i = 0; i < n; i++){
+            double fit = slope * prediction[i] + intercept;
+            ssr += (fit - ybar) * (fit - ybar);
+        }
+            
+        return ssr / yybar;
+    }
+    
+    public double test(){
+        double totError = 0.0;
+        for(int i = 0; i < this.target.length; i++){
+            totError += Math.pow(this.target[i] - this.prediction[i], 2);
+        }
+        return totError;
+}
 }

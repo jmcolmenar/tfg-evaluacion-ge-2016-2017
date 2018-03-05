@@ -92,11 +92,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
     }
 
     public static void main(String[] args) throws EvaluationException, IOException, Exception {
-       Connector con = new Connector();
-       con.connect();
-       con.close();
-
-//Initial configuration
+        //Initial configuration
         CommandLine cmd = startUp(args);
         //Load properties
         configuration = new EvaluationCofing();
