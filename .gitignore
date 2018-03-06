@@ -18,6 +18,12 @@
 *.tar.gz
 *.rar
 
+!commons-cli-1.4.jar
+!commons-math3-3.4.jar
+!jeco.jar
+!jeval.jar
+!sqlite-jdbc-3.21.0.jar
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
@@ -28,4 +34,3 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-!lib
