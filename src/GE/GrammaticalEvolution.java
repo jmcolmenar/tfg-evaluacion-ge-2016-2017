@@ -104,6 +104,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         configuration = new EvaluationCofing();
         //First create the problem
         GrammaticalEvolution problem = new GrammaticalEvolution(cmd.getOptionValue("grammar"));
+        problem.setSensibleInitialization(true, 50);
         //Second create the algorithm
         SimpleGrammaticalEvolution algorithm = new SimpleGrammaticalEvolution(problem, configuration.maxPopulationSize, configuration.maxGenerations, configuration.probMutation, configuration.probCrossover);
         //Load target
