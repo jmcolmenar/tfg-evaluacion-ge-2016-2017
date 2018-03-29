@@ -18,6 +18,9 @@
 *.tar.gz
 *.rar
 
+#dolphin files
+.directory
+
 !commons-cli-1.4.jar
 !commons-math3-3.4.jar
 !jeco.jar
