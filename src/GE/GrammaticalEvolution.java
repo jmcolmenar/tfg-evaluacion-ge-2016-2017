@@ -37,6 +37,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
     public GrammaticalEvolution(String pathToBnf) {
         super(pathToBnf, configuration.numOfObjetives, configuration.chromosomelength, configuration.maxCntWrappings, configuration.codonUpperBound);
+        this.setSensibleInitialization(configuration.siValue, configuration.siPercentile);
         this.evaluator = new Evaluator();
     }
 
@@ -65,6 +66,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             }
             //Add to prediction array the evaluation calculated
             prediction[i] = String.valueOf(funcI);
+            solution.getProperties().put("a", (double)funcI);
         }
         //Calculate fitness
         Fitness fitness = new Fitness(func, prediction);
@@ -104,7 +106,6 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         configuration = new EvaluationCofing();
         //First create the problem
         GrammaticalEvolution problem = new GrammaticalEvolution(cmd.getOptionValue("grammar"));
-        problem.setSensibleInitialization(true, 50);
         //Second create the algorithm
         SimpleGrammaticalEvolution algorithm = new SimpleGrammaticalEvolution(problem, configuration.maxPopulationSize, configuration.maxGenerations, configuration.probMutation, configuration.probCrossover);
         //Load target
@@ -115,8 +116,8 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         algorithm.initialize();
         Solutions<Variable<Integer>> solutions = algorithm.execute();
         for (Solution<Variable<Integer>> solution : solutions) {
-            //solution.getVariable(0).getValue()
-            //        problem.generatePhenotype(solution).getUsedGenes()
+            //int prueba1 = solution.getVariable(0).getValue();//genotipo
+            //int prueba2 = problem.generatePhenotype(solution).getUsedGenes();//genes usados
             logger.log(Level.INFO, "Fitness = ({0})", solution.getObjectives().get(0));
             logger.log(Level.INFO, "Phenotype = ({0})", problem.generatePhenotype(solution).toString());
         }
