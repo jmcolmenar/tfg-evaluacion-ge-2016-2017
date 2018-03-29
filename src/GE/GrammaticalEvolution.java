@@ -54,7 +54,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             double funcI;
             try {
                 String aux = this.evaluator.evaluate(currentFunction);
-                if (aux.equals("NaN")) {
+                if (aux.equals("NaN")) {//revisar
                     funcI = Double.POSITIVE_INFINITY;
                 } else {
                     funcI = Double.valueOf(aux);
@@ -68,7 +68,13 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         }
         //Calculate fitness
         Fitness fitness = new Fitness(func, prediction);
-        solution.getObjectives().set(0, fitness.test());
+        double fValue = fitness.r2();
+        
+        //Control valid value as fitness
+        if (Double.isNaN(fValue))
+            solution.getObjectives().set(0, Double.POSITIVE_INFINITY);
+        else
+            solution.getObjectives().set(0, fValue);
     }
     
     //Method to replace the unknowns variables by values
@@ -108,6 +114,8 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         algorithm.initialize();
         Solutions<Variable<Integer>> solutions = algorithm.execute();
         for (Solution<Variable<Integer>> solution : solutions) {
+            //solution.getVariable(0).getValue()
+            //        problem.generatePhenotype(solution).getUsedGenes()
             logger.log(Level.INFO, "Fitness = ({0})", solution.getObjectives().get(0));
             logger.log(Level.INFO, "Phenotype = ({0})", problem.generatePhenotype(solution).toString());
         }

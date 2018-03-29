@@ -46,7 +46,7 @@ public class Fitness {
         
         double totError = 0.0;
         for(int i = 0; i < this.target.length; i++)
-            totError += (this.target[i] - this.prediction[i]);
+            totError += Math.abs(this.target[i] - this.prediction[i]);
         
         return totError;
     }
@@ -60,7 +60,7 @@ public class Fitness {
         int n = target.length;
         double rss = 0.0;
         for (int i= 0; i < n; i++)
-            rss += Math.sqrt(target[i] - prediction[i]);
+            rss += Math.sqrt(Math.abs(target[i] - prediction[i]));
         
         return rss/n;
     }
@@ -74,7 +74,7 @@ public class Fitness {
         int n = target.length;
         double totError = 0.0;
         for(int i = 0; i < n; i++)
-            totError += (this.target[i] - this.prediction[i]);
+            totError += Math.abs(this.target[i] - this.prediction[i]);
         
         return totError/n;
     }
@@ -112,7 +112,7 @@ public class Fitness {
             double fit = slope * prediction[i] + intercept;
             ssr += (fit - ybar) * (fit - ybar);
         }
-            
+        
         return ssr / yybar;
     }
     
