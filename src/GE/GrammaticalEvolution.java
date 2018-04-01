@@ -5,7 +5,7 @@
  */
 package GE;
 
-import BBDD.Connector;
+import BBDD.DAO;
 import Import.CSVReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             }
             //Add to prediction array the evaluation calculated
             prediction[i] = String.valueOf(funcI);
-            solution.getProperties().put("a", (double)funcI);
+            solution.getProperties().put("E" + i, (double)funcI);
         }
         //Calculate fitness
         Fitness fitness = new Fitness(func, prediction);
