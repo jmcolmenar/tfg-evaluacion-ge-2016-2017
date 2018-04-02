@@ -18,21 +18,21 @@ import net.sourceforge.jeval.EvaluationException;
 public class EvaluationCofing {
     
     private static final String PATH = "src/Resources/config.properties";
-    
+        
     //Problem const
-    private static final String NUM_OF_OBJECTIVES = "NUM_OF_OBJECTIVES";
-    private static final String CHROMOSOME_LENGTH = "CHROMOSOME_LENGTH";
-    private static final String MAX_CNT_WRAPPINGS = "MAX_CNT_WRAPPINGS";
-    private static final String CODON_UPPER_BOUND = "CODON_UPPER_BOUND";
-    private static final String SENSIBLE_INIT_VALUE = "SENSIBLE_INIT_VALUE";
-    private static final String SENSIBLE_INIT_PERCENTILE = "SENSIBLE_INIT_PERCENTILE";
+    public static final String NUM_OF_OBJECTIVES = "NUM_OF_OBJECTIVES";
+    public static final String CHROMOSOME_LENGTH = "CHROMOSOME_LENGTH";
+    public static final String MAX_CNT_WRAPPINGS = "MAX_CNT_WRAPPINGS";
+    public static final String CODON_UPPER_BOUND = "CODON_UPPER_BOUND";
+    public static final String SENSIBLE_INIT_VALUE = "SENSIBLE_INIT_VALUE";
+    public static final String SENSIBLE_INIT_PERCENTILE = "SENSIBLE_INIT_PERCENTILE";
     
     //Algorithm const
-    private static final String MAX_POPULATION_SIZE = "MAX_POPULATION_SIZE";
-    private static final String MAX_GENERATIONS = "MAX_GENERATIONS";
-    private static final String PROB_MUTATION = "PROB_MUTATION";
-    private static final String PROB_CROSSOVER = "PROB_CROSSOVER";
-    
+    public static final String MAX_POPULATION_SIZE = "MAX_POPULATION_SIZE";
+    public static final String MAX_GENERATIONS = "MAX_GENERATIONS";
+    public static final String PROB_MUTATION = "PROB_MUTATION";
+    public static final String PROB_CROSSOVER = "PROB_CROSSOVER";
+        
     //Problem vars
     public int numOfObjetives;
     public int chromosomelength;    

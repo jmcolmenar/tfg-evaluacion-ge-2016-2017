@@ -8,9 +8,12 @@ package GE;
 import BBDD.DAO;
 import Import.CSVReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jeco.core.algorithm.ge.SimpleGrammaticalEvolution;
@@ -55,7 +58,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             double funcI;
             try {
                 String aux = this.evaluator.evaluate(currentFunction);
-                if (aux.equals("NaN")) {//revisar
+                if (aux.equals("NaN")) {//TODO revisar
                     funcI = Double.POSITIVE_INFINITY;
                 } else {
                     funcI = Double.valueOf(aux);
@@ -66,7 +69,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             }
             //Add to prediction array the evaluation calculated
             prediction[i] = String.valueOf(funcI);
-            solution.getProperties().put("E" + i, (double)funcI);
+            solution.getProperties().put(String.valueOf(i), (double)funcI);
         }
         //Calculate fitness
         Fitness fitness = new Fitness(func, prediction);
@@ -100,10 +103,16 @@ public class GrammaticalEvolution extends AbstractProblemGE {
     }
 
     public static void main(String[] args) throws EvaluationException, IOException, Exception {
+        //Connect to BBDD
+        DAO dao = new DAO();
+        dao.connect();
         //Initial configuration
-        CommandLine cmd = startUp(args);
+        CommandLine cmd = startUp(args);//TODO: guardar en BBDD
         //Load properties
         configuration = new EvaluationCofing();
+        //Save to BBDD the new Experiment configuration
+        String idExp = nextExperiment(dao.getMaxExperiment());
+        dao.saveExperiment(idExp, configuration);
         //First create the problem
         GrammaticalEvolution problem = new GrammaticalEvolution(cmd.getOptionValue("grammar"));
         //Second create the algorithm
@@ -116,11 +125,13 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         algorithm.initialize();
         Solutions<Variable<Integer>> solutions = algorithm.execute();
         for (Solution<Variable<Integer>> solution : solutions) {
-            //int prueba1 = solution.getVariable(0).getValue();//genotipo
-            //int prueba2 = problem.generatePhenotype(solution).getUsedGenes();//genes usados
+            //Save to BBDD the solution
+            dao.saveResult(idExp,solution, problem);
             logger.log(Level.INFO, "Fitness = ({0})", solution.getObjectives().get(0));
             logger.log(Level.INFO, "Phenotype = ({0})", problem.generatePhenotype(solution).toString());
         }
+        //Close database connection
+        dao.close();
     }
 
     //Method to check the initial arguments
@@ -159,13 +170,22 @@ public class GrammaticalEvolution extends AbstractProblemGE {
     }
     
     //Method to get the variables
-    private static HashMap<String, Integer> getVariables(String[][] phenotype){
-        
+    private static HashMap<String, Integer> getVariables(String[][] phenotype){        
         String[] lineVars = phenotype[0];
         
         HashMap<String, Integer> aux = new HashMap<>();
         for(int i = 1; i < lineVars.length; i++)
             aux.put(lineVars[i], i);
         return aux;
+    }
+        
+    public static String nextExperiment(String str){
+        if (str == null)
+            str = "EXP0";
+        
+        String replacedStr = str.replaceFirst("EXP", "");
+        int number = Integer.parseInt(replacedStr) + 1;
+        String newExperiment = "EXP" + String.valueOf(number);
+        return newExperiment;
     }
 }

@@ -7,8 +7,8 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="TFG-Evaluacion-GE" default="default" basedir=".">
-    <description>Builds, tests, and runs the project TFG-Evaluacion-GE.</description>
+<project name="tfg-evaluacion-ge-2016-2017" default="default" basedir=".">
+    <description>Builds, tests, and runs the project tfg-evaluacion-ge-2016-2017.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
 
@@ -58,7 +58,7 @@
 
     An example of overriding the target for project execution could look like this:
 
-        <target name="run" depends="TFG-Evaluacion-GE-impl.jar">
+        <target name="run" depends="tfg-evaluacion-ge-2016-2017-impl.jar">
             <exec dir="bin" executable="launcher.exe">
                 <arg file="${dist.jar}"/>
             </exec>
