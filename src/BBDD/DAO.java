@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jeco.core.problem.Solution;
 import jeco.core.problem.Variable;
+import org.apache.commons.cli.CommandLine;
 
 /**
  *
@@ -52,7 +53,7 @@ public class DAO {
         }
     }
 
-    public void saveExperiment(String idExp, EvaluationCofing configuration) {
+    public void saveExperiment(String idExp, EvaluationCofing configuration, CommandLine cmd) {
         try {            
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save experiment to IdEXP: {0}", idExp);
             
@@ -145,6 +146,26 @@ public class DAO {
             st.setString(1, idExp);
             st.setString(2, EvaluationCofing.PROB_CROSSOVER);
             st.setString(3, String.valueOf(configuration.probCrossover));
+            st.execute();
+            
+            st = connect.prepareStatement("insert into Experimentos (IdExp, "
+                            + "Propiedad, Valor)"
+                            + " values (?,?,?)");
+
+            st.setString(1, idExp);
+            st.setString(2, "Grammar");
+            String[] grammarList = cmd.getOptionValue("grammar").split("/");
+            st.setString(3, grammarList[grammarList.length - 1]);
+            st.execute();
+            
+            st = connect.prepareStatement("insert into Experimentos (IdExp, "
+                            + "Propiedad, Valor)"
+                            + " values (?,?,?)");
+
+            st.setString(1, idExp);
+            st.setString(2, "Training");
+            String[] trainingList = cmd.getOptionValue("training").split("/");
+            st.setString(3, trainingList[trainingList.length - 1]);
             st.execute();            
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());

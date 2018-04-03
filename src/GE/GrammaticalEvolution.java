@@ -112,13 +112,13 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         configuration = new EvaluationCofing();
         //Save to BBDD the new Experiment configuration
         String idExp = nextExperiment(dao.getMaxExperiment());
-        dao.saveExperiment(idExp, configuration);
+        dao.saveExperiment(idExp, configuration, cmd);
         //First create the problem
         GrammaticalEvolution problem = new GrammaticalEvolution(cmd.getOptionValue("grammar"));
         //Second create the algorithm
         SimpleGrammaticalEvolution algorithm = new SimpleGrammaticalEvolution(problem, configuration.maxPopulationSize, configuration.maxGenerations, configuration.probMutation, configuration.probCrossover);
         //Load target
-        CSVReader csv = new CSVReader(cmd.getOptionValue("target"));
+        CSVReader csv = new CSVReader(cmd.getOptionValue("training"));
         func = csv.loadMatrix();
         vars = getVariables(func);
         //Run
@@ -142,7 +142,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         grammar.setRequired(true);
         options.addOption(grammar);
 
-        Option target = new Option("t", "target", true, "target file path");
+        Option target = new Option("t", "training", true, "training file path");
         target.setRequired(true);
         options.addOption(target);
 
@@ -161,10 +161,11 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         }
 
         String grammarFilePath = cmd.getOptionValue("grammar");
-        String targetFilePath = cmd.getOptionValue("target");
+        String targetFilePath = cmd.getOptionValue("training");
 
+        //TODO: logger
         System.out.println("Grammar used: " + grammarFilePath);
-        System.out.println("Target used: " + targetFilePath);
+        System.out.println("Training used: " + targetFilePath);
 
         return cmd;
     }
