@@ -58,7 +58,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             double funcI;
             try {
                 String aux = this.evaluator.evaluate(currentFunction);
-                if (aux.equals("NaN")) {//TODO revisar
+                if (aux.equals("NaN")) {//TODO revisar valores menores que 0
                     funcI = Double.POSITIVE_INFINITY;
                 } else {
                     funcI = Double.valueOf(aux);
@@ -103,71 +103,38 @@ public class GrammaticalEvolution extends AbstractProblemGE {
     }
 
     public static void main(String[] args) throws EvaluationException, IOException, Exception {
-        //Connect to BBDD
-        DAO dao = new DAO();
-        dao.connect();
-        //Initial configuration
-        CommandLine cmd = startUp(args);//TODO: guardar en BBDD
         //Load properties
         configuration = new EvaluationCofing();
-        //Save to BBDD the new Experiment configuration
-        String idExp = nextExperiment(dao.getMaxExperiment());
-        dao.saveExperiment(idExp, configuration, cmd);
-        //First create the problem
-        GrammaticalEvolution problem = new GrammaticalEvolution(cmd.getOptionValue("grammar"));
-        //Second create the algorithm
-        SimpleGrammaticalEvolution algorithm = new SimpleGrammaticalEvolution(problem, configuration.maxPopulationSize, configuration.maxGenerations, configuration.probMutation, configuration.probCrossover);
-        //Load target
-        CSVReader csv = new CSVReader(cmd.getOptionValue("training"));
-        func = csv.loadMatrix();
-        vars = getVariables(func);
-        //Run
-        algorithm.initialize();
-        Solutions<Variable<Integer>> solutions = algorithm.execute();
-        for (Solution<Variable<Integer>> solution : solutions) {
-            //Save to BBDD the solution
-            dao.saveResult(idExp,solution, problem);
-            logger.log(Level.INFO, "Fitness = ({0})", solution.getObjectives().get(0));
-            logger.log(Level.INFO, "Phenotype = ({0})", problem.generatePhenotype(solution).toString());
+        //Connect to BBDD
+        DAO dao = new DAO();
+        dao.connect(configuration.database);
+        dao.dropTables();
+        dao.createTables();
+        //Save to BBDD experiment configuration
+        dao.saveExperiment(configuration);
+        for (int i = 0; i < configuration.runs; i++)
+        {
+            //First create the problem
+            GrammaticalEvolution problem = new GrammaticalEvolution(configuration.grammar);
+            //Second create the algorithm
+            SimpleGrammaticalEvolution algorithm = new SimpleGrammaticalEvolution(problem,
+                    configuration.maxPopulationSize, configuration.maxGenerations, configuration.probMutation, configuration.probCrossover);
+            //Load target
+            CSVReader csv = new CSVReader(configuration.training);
+            func = csv.loadMatrix();
+            vars = getVariables(func);
+            //Run
+            algorithm.initialize();
+            Solutions<Variable<Integer>> solutions = algorithm.execute();
+            for (Solution<Variable<Integer>> solution : solutions) {
+                //Save to BBDD the solution
+                dao.saveResult(configuration.idExperimento, (i + 1), solution, problem);
+                logger.log(Level.INFO, "Fitness = ({0})", solution.getObjectives().get(0));
+                logger.log(Level.INFO, "Phenotype = ({0})", problem.generatePhenotype(solution).toString());
+            }
         }
         //Close database connection
         dao.close();
-    }
-
-    //Method to check the initial arguments
-    private static CommandLine startUp(String[] args) throws Exception {
-        Options options = new Options();
-
-        Option grammar = new Option("g", "grammar", true, "grammar file path");
-        grammar.setRequired(true);
-        options.addOption(grammar);
-
-        Option target = new Option("t", "training", true, "training file path");
-        target.setRequired(true);
-        options.addOption(target);
-
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd;
-
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp("utility-name", options);
-
-            System.exit(1);
-            return null;
-        }
-
-        String grammarFilePath = cmd.getOptionValue("grammar");
-        String targetFilePath = cmd.getOptionValue("training");
-
-        //TODO: logger
-        System.out.println("Grammar used: " + grammarFilePath);
-        System.out.println("Training used: " + targetFilePath);
-
-        return cmd;
     }
     
     //Method to get the variables
@@ -178,15 +145,5 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         for(int i = 1; i < lineVars.length; i++)
             aux.put(lineVars[i], i);
         return aux;
-    }
-        
-    public static String nextExperiment(String str){
-        if (str == null)
-            str = "EXP0";
-        
-        String replacedStr = str.replaceFirst("EXP", "");
-        int number = Integer.parseInt(replacedStr) + 1;
-        String newExperiment = "EXP" + String.valueOf(number);
-        return newExperiment;
-    }
+    }        
 }
