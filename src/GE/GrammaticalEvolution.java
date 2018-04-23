@@ -6,15 +6,15 @@
 package GE;
 
 import BBDD.DAO;
+import BBDD.JDBCLogHandler;
 import Import.CSVReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import jeco.core.algorithm.ge.SimpleGrammaticalEvolution;
 import jeco.core.algorithm.moge.AbstractProblemGE;
@@ -24,7 +24,6 @@ import jeco.core.problem.Solutions;
 import jeco.core.problem.Variable;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
-import org.apache.commons.cli.*;
 
 /**
  *
@@ -102,35 +101,60 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         return clone;
     }
 
-    public static void main(String[] args) throws EvaluationException, IOException, Exception {
+    public static void main(String[] args) throws EvaluationException, IOException, Exception {        
         //Load properties
         configuration = new EvaluationCofing();
+                
         //Connect to BBDD
         DAO dao = new DAO();
         dao.connect(configuration.database);
         dao.dropTables();
-        dao.createTables();
+        dao.createTables();        
+        
+        // set up the JDBCLogger handler
+        JDBCLogHandler jdbcHandler
+                = new JDBCLogHandler(configuration.idExperimento
+                        , "org.sqlite.JDBC"
+                        , "jdbc:sqlite:" + configuration.database);
+        
         //Save to BBDD experiment configuration
         dao.saveExperiment(configuration);
         for (int i = 0; i < configuration.runs; i++)
         {
             //First create the problem
-            GrammaticalEvolution problem = new GrammaticalEvolution(configuration.grammar);
+            GrammaticalEvolution problem 
+                    = new GrammaticalEvolution(configuration.grammar);
+            
             //Second create the algorithm
-            SimpleGrammaticalEvolution algorithm = new SimpleGrammaticalEvolution(problem,
-                    configuration.maxPopulationSize, configuration.maxGenerations, configuration.probMutation, configuration.probCrossover);
+            SimpleGrammaticalEvolution algorithm 
+                    = new SimpleGrammaticalEvolution(problem
+                            , configuration.maxPopulationSize
+                            , configuration.maxGenerations
+                            , configuration.probMutation
+                            , configuration.probCrossover);
+            
+            //Add JDBC to save logger at database
+            Logger sgaLogger = GetSimpleGeneticAlgorithmLogger();
+            sgaLogger.addHandler(jdbcHandler);
+            
+            logger.addHandler(jdbcHandler);
+            
             //Load target
             CSVReader csv = new CSVReader(configuration.training);
             func = csv.loadMatrix();
             vars = getVariables(func);
+            
             //Run
+            int run = i + 1;
+            jdbcHandler.setRun(run);
+            
             algorithm.initialize();
             Solutions<Variable<Integer>> solutions = algorithm.execute();
             for (Solution<Variable<Integer>> solution : solutions) {
                 //Save to BBDD the solution
-                dao.saveResult(configuration.idExperimento, (i + 1), solution, problem);
-                logger.log(Level.INFO, "Fitness = ({0})", solution.getObjectives().get(0));
-                logger.log(Level.INFO, "Phenotype = ({0})", problem.generatePhenotype(solution).toString());
+                dao.saveResult(configuration.idExperimento, run, solution, problem);
+                logger.info(String.format("Fitness = (%s)", solution.getObjectives().get(0)));
+                logger.info(String.format("Phenotype = (%s)", problem.generatePhenotype(solution).toString()));
             }
         }
         //Close database connection
@@ -145,5 +169,12 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         for(int i = 1; i < lineVars.length; i++)
             aux.put(lineVars[i], i);
         return aux;
-    }        
+    }
+    
+    //Method to get the logger from class SimpleGeneticAlgorithm
+    private static Logger GetSimpleGeneticAlgorithmLogger(){
+        LogManager manager = LogManager.getLogManager();
+        return manager.getLogger("jeco.core.algorithm.ga.SimpleGeneticAlgorithm");
+    }
+    
 }

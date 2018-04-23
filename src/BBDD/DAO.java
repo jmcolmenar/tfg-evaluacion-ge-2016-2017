@@ -97,8 +97,10 @@ public class DAO {
             st = connect.prepareStatement("CREATE TABLE Logs ("
                             + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
                             + "ID_Experimento TEXT NOT NULL,"
+                            + "Run INTEGER NOT NULL,"
+                            + "Logger TEXT NOT NULL,"
                             + "Texto TEXT NOT NULL,"
-                            + "Timestamp DATETIME NOT NULL );"
+                            + "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP );"
             );
             st.execute();
         } catch (SQLException ex) {
