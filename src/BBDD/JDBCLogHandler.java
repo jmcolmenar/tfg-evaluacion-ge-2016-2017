@@ -67,19 +67,26 @@ public class JDBCLogHandler extends Handler {
     protected PreparedStatement prepInsert;
 
     /**
+     * @param idExperimento the name of experiment to be runed
      * @param driverString The JDBC driver to use.
      * @param connectionString The connection string that specifies the database
+     * @param preconnect a possible previous Connection created
      * to use.
+     * @throws java.sql.SQLException
      */
     public JDBCLogHandler(String idExperimento, String driverString,
-            String connectionString) throws SQLException {
+            String connectionString, Connection preconnect) throws SQLException {
         try {
             this.driverString = driverString;
             this.connectionString = connectionString;
             this.idExperimento = idExperimento;
 
             Class.forName(driverString);
-            connection = DriverManager.getConnection(connectionString);
+            
+            if (preconnect != null)
+                connection = preconnect;
+            else                
+                connection = DriverManager.getConnection(connectionString);
             prepInsert = connection.prepareStatement(insertSQL);
         } catch (ClassNotFoundException e) {
             System.err.println("Error on open: " + e);

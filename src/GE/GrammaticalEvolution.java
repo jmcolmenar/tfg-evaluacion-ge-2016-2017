@@ -9,7 +9,7 @@ import BBDD.DAO;
 import BBDD.JDBCLogHandler;
 import Import.CSVReader;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -108,8 +108,10 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
         //Connect to BBDD
         DAO dao = new DAO();
-        dao.connect(configuration.database);
-        dao.dropTables();
+        Connection connect = dao.connect(configuration.database);
+        if (dao.existsID_Experimento(configuration.idExperimento))
+            throw new Exception("Ya existe el ID_Experimento: " + configuration.idExperimento + " en la base de datos");
+        //dao.dropTables();
         dao.createTables();
 
         //Save to BBDD experiment configuration
@@ -134,9 +136,11 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
         // set up the JDBCLogger handler
         JDBCLogHandler jdbcHandler
-                = new JDBCLogHandler(configuration.idExperimento,
+                = new JDBCLogHandler(
+                        configuration.idExperimento,
                         "org.sqlite.JDBC",
-                        "jdbc:sqlite:" + configuration.database);
+                        "jdbc:sqlite:" + configuration.database,
+                        connect);
 
         //Add JDBC to save logger at database
         logger.addHandler(jdbcHandler);

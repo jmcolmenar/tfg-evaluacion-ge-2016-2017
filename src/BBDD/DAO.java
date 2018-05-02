@@ -31,7 +31,7 @@ public class DAO {
 
     Connection connect;
 
-    public void connect(String url) {
+    public Connection connect(String url) {
         try {
             connect = DriverManager.getConnection("jdbc:sqlite:" + url);
             if (connect != null) {
@@ -40,6 +40,7 @@ public class DAO {
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, "Unable to connect to the database {0}", ex.getMessage());
         }
+        return connect;
     }
 
     public void close() {
@@ -50,57 +51,55 @@ public class DAO {
         }
     }
 
-    //TODO guardar logger en BBDD
     //TODO si no existen las tablas crearlas y si existen dejarlas o que¿?
-    
-    public void dropTables(){
-        try{
+    public void dropTables() {
+        try {
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Drop tables");
             PreparedStatement st = connect.prepareStatement("DROP TABLE if exists Experimentos;");
             st.execute();
-            
+
             st = connect.prepareStatement("DROP TABLE  if exists Resultados;");
             st.execute();
-            
+
             st = connect.prepareStatement("DROP TABLE  if exists Logs;");
             st.execute();
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
-    
+
     public void createTables() {
         try {
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Create init tables");
 
             PreparedStatement st;
-            st = connect.prepareStatement("CREATE TABLE Experimentos ("
-                            + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
-                            + "ID_Experimento TEXT NOT NULL,"
-                            + "Propiedad TEXT NOT NULL,"
-                            + "Valor TEXT NOT NULL );"
-                    );
-            st.execute();
-                            
-            st = connect.prepareStatement("CREATE TABLE Resultados ("
-                            + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
-                            + "ID_Experimento TEXT NOT NULL,"
-                            + "Run INTEGER NOT NULL,"
-                            + "Genotipo TEXT NOT NULL,"
-                            + "Fenotipo TEXT NOT NULL,"
-                            + "Evaluacion TEXT NOT NULL,"
-                            + "Fitness DOUBLE NOT NULL,"
-                            + "GenesUsados INTEGER NOT NULL );"
+            st = connect.prepareStatement("CREATE TABLE IF NOT EXISTS Experimentos ("
+                    + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                    + "ID_Experimento TEXT NOT NULL,"
+                    + "Propiedad TEXT NOT NULL,"
+                    + "Valor TEXT NOT NULL );"
             );
             st.execute();
-            
-            st = connect.prepareStatement("CREATE TABLE Logs ("
-                            + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
-                            + "ID_Experimento TEXT NOT NULL,"
-                            + "Run INTEGER NOT NULL,"
-                            + "Logger TEXT NOT NULL,"
-                            + "Texto TEXT NOT NULL,"
-                            + "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP );"
+
+            st = connect.prepareStatement("CREATE TABLE IF NOT EXISTS Resultados ("
+                    + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                    + "ID_Experimento TEXT NOT NULL,"
+                    + "Run INTEGER NOT NULL,"
+                    + "Genotipo TEXT NOT NULL,"
+                    + "Fenotipo TEXT NOT NULL,"
+                    + "Evaluacion TEXT NOT NULL,"
+                    + "Fitness DOUBLE NOT NULL,"
+                    + "GenesUsados INTEGER NOT NULL );"
+            );
+            st.execute();
+
+            st = connect.prepareStatement("CREATE TABLE IF NOT EXISTS Logs ("
+                    + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                    + "ID_Experimento TEXT NOT NULL,"
+                    + "Run INTEGER NOT NULL,"
+                    + "Logger TEXT NOT NULL,"
+                    + "Texto TEXT NOT NULL,"
+                    + "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP );"
             );
             st.execute();
         } catch (SQLException ex) {
@@ -111,7 +110,7 @@ public class DAO {
     public void saveExperiment(EvaluationCofing configuration) {
         try {
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save experiment as ID_Experimento: {0}", configuration.idExperimento);
-            
+
             PreparedStatement st;
 
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
@@ -133,28 +132,28 @@ public class DAO {
             String[] trainingList = configuration.training.split("/");
             st.setString(3, trainingList[trainingList.length - 1]);
             st.execute();
-            
+
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
-                            + "Propiedad, Valor)"
-                            + " values (?,?,?)");
+                    + "Propiedad, Valor)"
+                    + " values (?,?,?)");
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, EvaluationCofing.DATABASE);
             st.setString(3, String.valueOf(configuration.database));
             st.execute();
-            
+
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
-                            + "Propiedad, Valor)"
-                            + " values (?,?,?)");
+                    + "Propiedad, Valor)"
+                    + " values (?,?,?)");
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, EvaluationCofing.RUNS);
             st.setString(3, String.valueOf(configuration.runs));
             st.execute();
-                        
+
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
-                            + "Propiedad, Valor)"
-                            + " values (?,?,?)");
+                    + "Propiedad, Valor)"
+                    + " values (?,?,?)");
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, EvaluationCofing.NUM_OF_OBJECTIVES);
@@ -268,21 +267,21 @@ public class DAO {
         }
     }
 
-    /*TODO: modify
-    public String getMaxExperiment() {
-        Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Getting max ID_Experimento");
+    public boolean existsID_Experimento(String id_Experimento) {
+        Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Searching ID_Experimento: " + id_Experimento);
 
         ResultSet result = null;
-        String stResult = "";
+        int existe = 0;
         try {
-            PreparedStatement st = connect.prepareStatement("select max(ID_Experimento) as ID_Experimento from Experimentos");
+            PreparedStatement st = connect.prepareStatement("select count(*) as existe from Experimentos where ID_Experimento = '" + id_Experimento + "'");
             result = st.executeQuery();
-            stResult = result.getString("ID_Experimento");
+            existe = result.getInt("existe");
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
-        return stResult;
-    }*/
+
+        return (existe > 0);
+    }
 
     private String genotypeToString(ArrayList<Variable<Integer>> variables) {
         String result = "";
