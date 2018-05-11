@@ -77,7 +77,8 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         if (Double.isNaN(fValue)) {
             solution.getObjectives().set(0, Double.POSITIVE_INFINITY);
         } else {
-            solution.getObjectives().set(0, fValue);
+            // R2 best is 1, but we are minimizing
+            solution.getObjectives().set(0, 1.0 - fValue);
         }
     }
 
