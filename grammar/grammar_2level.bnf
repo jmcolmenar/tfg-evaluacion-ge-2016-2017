@@ -1,0 +1,5 @@
+<func>  ::= <expr1>
+<expr1> ::= <expr> <op> <expr> <op> <expr> <op> <expr> | <expr> <op> <expr> <op> <expr>
+<expr>  ::= <var> | <expr> <op> <expr>
+<op>    ::= + | - | / | *
+<var>   ::= X1 | X2 | X3 | X4 | X5 | X6 | X7 | X8 | X9 | X10

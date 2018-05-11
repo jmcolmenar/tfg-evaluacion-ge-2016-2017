@@ -253,7 +253,7 @@ public class DAO {
                     = connect.prepareStatement("insert into Resultados (ID_Experimento, Run,"
                             + "Genotipo, Fenotipo, Evaluacion, Fitness, GenesUsados)"
                             + " values (?,?,?,?,?,?,?)");
-
+            
             st.setString(1, ID_Experimento);
             st.setInt(2, run);
             st.setString(3, genotypeToString(solution.getVariables()));
@@ -306,9 +306,12 @@ public class DAO {
         String result = "";
         for (Iterator<String> i = keys.iterator(); i.hasNext();) {
             String item = i.next();
-            result += String.valueOf(h.get(item)) + ";";
+                result += String.valueOf(h.get(item)) + ";";
         }
-
-        return result.substring(0, result.length() - 1);
+        
+        if (result != "")
+            return result.substring(0, result.length() - 1);
+        else
+            return "Invalid phenotype";
     }
 }

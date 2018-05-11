@@ -1,0 +1,5 @@
+<expr>  ::= <var> 
+            | <expr> <op> <expr> <op> <expr> <op> <expr> 
+            | <expr> <op> <expr> <op> <expr>
+<op>    ::= + | - | / | *
+<var>   ::= X | Z | T | S | R | U | V | P | Q | K

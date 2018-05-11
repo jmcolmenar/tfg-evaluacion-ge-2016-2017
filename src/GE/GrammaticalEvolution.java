@@ -13,7 +13,6 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import jeco.core.algorithm.ge.SimpleGrammaticalEvolution;
@@ -63,7 +62,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
                     funcI = Double.valueOf(aux);
                 }
             } catch (EvaluationException ex) {
-                Logger.getLogger(GrammaticalEvolution.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(GrammaticalEvolution.class.getName()).log(Level.SEVERE, null, ex);
                 funcI = Double.POSITIVE_INFINITY;
             }
             //Add to prediction array the evaluation calculated
