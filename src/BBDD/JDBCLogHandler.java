@@ -34,23 +34,23 @@ public class JDBCLogHandler extends Handler {
      * Used to hold the connection to the JDBC data source.
      */
     Connection connection;
-    
+
     /**
      * Used to save the ID_Experimento at logs table.
      */
     String idExperimento;
-    
+
     /**
      * Used to save the execution number of algorithm at logs table.
      */
     int run;
-    
-    
+
     /**
      * Setter to set the number of execution algorithm.
+     *
      * @param run number of execution
      */
-    public void setRun(int run){
+    public void setRun(int run) {
         this.run = run;
     }
 
@@ -70,8 +70,7 @@ public class JDBCLogHandler extends Handler {
      * @param idExperimento the name of experiment to be runed
      * @param driverString The JDBC driver to use.
      * @param connectionString The connection string that specifies the database
-     * @param preconnect a possible previous Connection created
-     * to use.
+     * @param preconnect a possible previous Connection created to use.
      * @throws java.sql.SQLException
      */
     public JDBCLogHandler(String idExperimento, String driverString,
@@ -82,11 +81,12 @@ public class JDBCLogHandler extends Handler {
             this.idExperimento = idExperimento;
 
             Class.forName(driverString);
-            
-            if (preconnect != null)
+
+            if (preconnect != null) {
                 connection = preconnect;
-            else                
+            } else {
                 connection = DriverManager.getConnection(connectionString);
+            }
             prepInsert = connection.prepareStatement(insertSQL);
         } catch (ClassNotFoundException e) {
             System.err.println("Error on open: " + e);
@@ -140,7 +140,7 @@ public class JDBCLogHandler extends Handler {
 
     @Override
     public void flush() {
-        
+
     }
 
     /**

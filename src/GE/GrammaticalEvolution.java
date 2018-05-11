@@ -9,10 +9,13 @@ import BBDD.DAO;
 import BBDD.JDBCLogHandler;
 import Import.CSVReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import jeco.core.algorithm.ge.SimpleGrammaticalEvolution;
@@ -71,15 +74,19 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         }
         //Calculate fitness
         Fitness fitness = new Fitness(func, prediction);
-        double fValue = fitness.r2();
+        double fValue = Double.NaN;
 
-        //Control valid value as fitness
-        if (Double.isNaN(fValue)) {
-            solution.getObjectives().set(0, Double.POSITIVE_INFINITY);
-        } else {
-            // R2 best is 1, but we are minimizing
-            solution.getObjectives().set(0, 1.0 - fValue);
+        try {
+            Method method = fitness.getClass().getMethod(configuration.fitnessMethod);
+            fValue = (double) method.invoke(fitness);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(GrammaticalEvolution.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        //Validate value to set objective
+        double objValue = fitness.validate(configuration.fitnessMethod, fValue);
+        //Set objectives
+        solution.getObjectives().set(0, objValue);
     }
 
     //Method to replace the unknowns variables by values
@@ -109,8 +116,9 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         //Connect to BBDD
         DAO dao = new DAO();
         Connection connect = dao.connect(configuration.database);
-        if (dao.existsID_Experimento(configuration.idExperimento))
+        if (dao.existsID_Experimento(configuration.idExperimento)) {
             throw new Exception("Ya existe el ID_Experimento: " + configuration.idExperimento + " en la base de datos");
+        }
         //dao.dropTables();
         dao.createTables();
 
