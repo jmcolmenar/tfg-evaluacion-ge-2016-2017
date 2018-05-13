@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author cgarc
+ * @author Carlos García Moreno
  */
 public class CSVReader {
 
@@ -19,17 +19,28 @@ public class CSVReader {
     private File file;
     private String csvSplitBy = ";";
 
+    /**
+     * Constructor who load the file from path @csvfile
+     * @param csvFile path of csv to load
+     */
     public CSVReader(String csvFile) {
         this.csvFile = csvFile;
         loadFile(this.csvFile);
     }
 
-    //Create object file
+    /**
+     * Create object file
+     * @param path cvs to load path
+     */
     private void loadFile(String path) {
         file = new File(path);
     }
 
-    //Get number of Rows from a CSV file
+    /**
+     * Get number of Rows from a CSV file
+     * @return number of rows
+     * @throws FileNotFoundException 
+     */
     private int numberRows() throws FileNotFoundException {//modificar private
         int nRows = 0;
         Scanner inputStream;
@@ -45,7 +56,11 @@ public class CSVReader {
         return nRows;
     }
 
-    //Get number of colummns from a CVS file
+    /**
+     * Get number of colummns from a CVS file
+     * @return return number of columns
+     * @throws FileNotFoundException 
+     */
     private int numberColumns() throws FileNotFoundException {
         int nColumns = 0;
         Scanner inputStream;
@@ -61,7 +76,11 @@ public class CSVReader {
         return nColumns;
     }
 
-    //Read CVS and create a matrix with the complete information
+    /**
+     * Read CVS and create a matrix with the complete information
+     * @return return a matrix String[][] created by the preload csv file
+     * @throws FileNotFoundException 
+     */
     public String[][] loadMatrix() throws FileNotFoundException {
         int rows = this.numberRows();
         int columns = this.numberColumns();
@@ -78,7 +97,6 @@ public class CSVReader {
                 values = line.split(csvSplitBy);
                 for (int i = 0; i < values.length; i++) {
                     matrix[j][i] = values[i];
-                    //System.out.println(values[i]);
                 }
                 j++;
             }

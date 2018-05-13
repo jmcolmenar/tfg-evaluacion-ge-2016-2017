@@ -16,7 +16,12 @@ public class Fitness {
     private double[] target;
     private double[] prediction;
 
-    //The constructor, conver the target and the prediction to the same dimesion and length to be compared
+    /**
+     * The constructor convert the target and the prediction to the 
+     * same dimesion and length to be compared
+     * @param target target preload
+     * @param prediction prediction calculated
+     */
     public Fitness(String[][] target, String[] prediction) {
         String[] oneDTarget = convert2dTo1d(target);
         String[] auxTarget = Arrays.copyOfRange(oneDTarget, 1, oneDTarget.length);
@@ -30,16 +35,23 @@ public class Fitness {
                 .toArray();
     }
 
-    //Method to get the first colum from an array
-    private String[] convert2dTo1d(String[][] array) {
-        String[] oneDimensional = new String[array.length];
-        for (int i = 0; i < array.length; i++) {
-            oneDimensional[i] = array[i][0];
+    /**
+     * Method to get the first colum from a matrix
+     * @param matrix a matrix
+     * @return return the array of the first column matrix
+     */
+    private String[] convert2dTo1d(String[][] matrix) {
+        String[] oneDimensional = new String[matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            oneDimensional[i] = matrix[i][0];
         }
         return oneDimensional;
     }
 
-    //Error absolute acumulated
+    /**
+     * Calculate the absolute acumulated error
+     * @return fitness calculated
+     */
     public double ABSAcumulated() {
         if (target.length != prediction.length) {
             throw new IllegalArgumentException("array lengths are not equal");
@@ -53,7 +65,10 @@ public class Fitness {
         return totError;
     }
 
-    //Mean squared error
+    /**
+     * Calculate the mean squared error
+     * @return the fitness calculated
+     */
     public double meanSquaredError() {
         if (target.length != prediction.length) {
             throw new IllegalArgumentException("array lengths are not equal");
@@ -68,7 +83,10 @@ public class Fitness {
         return rss / n;
     }
 
-    //Average error
+    /**
+     * Calculate the Average error
+     * @return the fitness calculated
+     */
     public double averageError() {
         if (target.length != prediction.length) {
             throw new IllegalArgumentException("array lengths are not equal");
@@ -82,8 +100,12 @@ public class Fitness {
 
         return totError / n;
     }
-
-    public double r2() {
+    
+    /**
+     * Calculate the r² error
+     * @return the fitness calculated
+     */
+    public double rSquared() {
         if (target.length != prediction.length) {
             throw new IllegalArgumentException("array lengths are not equal");
         }
@@ -119,7 +141,13 @@ public class Fitness {
 
         return ssr / yybar;
     }
-
+    
+    /**
+     * Validate the value that should be set at solution
+     * @param method method used to calculate the fitness
+     * @param n fitnes calculated previously
+     * @return the value to be set as objective at solution
+     */
     public double validate(String method, double n) {
         //Control valid value as fitness
         if (Double.isNaN(n)) {
@@ -128,8 +156,8 @@ public class Fitness {
             double aux;
             switch (method) {
                 // R2 best is 1, but we are minimizing
-                case "r2":
-                    aux = (1 - n);
+                case "rSquared":
+                    aux = (1.0 - n);
                     break;
                 default:
                     aux = n;
@@ -139,6 +167,10 @@ public class Fitness {
         }
     }
 
+    /**
+     * This a simple fitness to test
+     * @return the fitness calculated
+     */
     public double test() {
         double totError = 0.0;
         for (int i = 0; i < this.target.length; i++) {

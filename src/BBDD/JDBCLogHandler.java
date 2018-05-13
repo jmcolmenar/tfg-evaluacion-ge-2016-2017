@@ -14,7 +14,7 @@ import java.util.logging.LogRecord;
 
 /**
  *
- * @author cgm02
+ * @author Carlos García Moreno
  */
 public class JDBCLogHandler extends Handler {
 

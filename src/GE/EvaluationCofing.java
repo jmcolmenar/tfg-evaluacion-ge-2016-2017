@@ -16,9 +16,6 @@ import net.sourceforge.jeval.EvaluationException;
  * @author Carlos García Moreno
  */
 public class EvaluationCofing {
-
-    private static final String PATH = "src/Resources/config.properties";
-
     //Experiment const
     public static final String ID_EXPERIMENTO = "ID_Experimento";
     public static final String GRAMMAR = "Grammar";
@@ -63,8 +60,14 @@ public class EvaluationCofing {
     public double probMutation;
     public double probCrossover;
 
-    public EvaluationCofing() throws IOException, EvaluationException {
-        Properties conf = loadProperties();
+    /**
+     * Method to load the configuration to the algorithm and problem.
+     * @param path route to cnfiguration.properties file
+     * @throws IOException
+     * @throws EvaluationException 
+     */
+    public EvaluationCofing(String path) throws IOException, EvaluationException {
+        Properties conf = loadProperties(path);
 
         //experiment configuration
         this.idExperimento = conf.getProperty(ID_EXPERIMENTO);
@@ -89,9 +92,16 @@ public class EvaluationCofing {
         this.probCrossover = Double.parseDouble(conf.getProperty(PROB_CROSSOVER));
     }
 
-    private Properties loadProperties() throws FileNotFoundException, IOException {
+    /**
+     * Method to load file and parse the content to a Properties object.
+     * @param path route to cnfiguration.properties file
+     * @return return the configuration parsed as Properties object
+     * @throws FileNotFoundException
+     * @throws IOException 
+     */
+    private Properties loadProperties(String path) throws FileNotFoundException, IOException {
         Properties config = new Properties();
-        config.load(new FileInputStream(PATH));
+        config.load(new FileInputStream(path));
         return config;
     }
 

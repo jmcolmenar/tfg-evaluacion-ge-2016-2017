@@ -26,12 +26,21 @@ import jeco.core.problem.Solutions;
 import jeco.core.problem.Variable;
 import net.sourceforge.jeval.EvaluationException;
 import net.sourceforge.jeval.Evaluator;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  *
  * @author Carlos García Moreno
  */
 public class GrammaticalEvolution extends AbstractProblemGE {
+    
+    private static final String CONFIGURATION = "configuration";
 
     private static final Logger logger = Logger.getLogger(GrammaticalEvolution.class.getName());
     protected Evaluator evaluator;
@@ -65,7 +74,6 @@ public class GrammaticalEvolution extends AbstractProblemGE {
                     funcI = Double.valueOf(aux);
                 }
             } catch (EvaluationException ex) {
-                //Logger.getLogger(GrammaticalEvolution.class.getName()).log(Level.SEVERE, null, ex);
                 funcI = Double.POSITIVE_INFINITY;
             }
             //Add to prediction array the evaluation calculated
@@ -89,7 +97,13 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         solution.getObjectives().set(0, objValue);
     }
 
-    //Method to replace the unknowns variables by values
+    /**
+     * Method to replace the unknowns variables by values
+     * @param originalFunction function of unknowns variables
+     * @param index index of func matrix, indicate the index 
+     *              of value used at previous evaluation
+     * @return function with the knowns values to be evaluated
+     */
     private String calculateFunctionValued(String originalFunction, int index) {
         String newFunction = originalFunction;
 
@@ -109,9 +123,17 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         return clone;
     }
 
+    /**
+     * Main method who control the executino of algorithm
+     * @param args arguments to init the algorithm
+     * @throws EvaluationException
+     * @throws IOException
+     * @throws Exception 
+     */
     public static void main(String[] args) throws EvaluationException, IOException, Exception {
-        //Load properties
-        configuration = new EvaluationCofing();
+        //Load properties configuration
+        CommandLine cmd = startUp(args);
+        configuration = new EvaluationCofing(cmd.getOptionValue(CONFIGURATION));
 
         //Connect to BBDD
         DAO dao = new DAO();
@@ -177,7 +199,12 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         dao.close();
     }
 
-    //Method to get the variables
+    /**
+     * Method to get the variables used to study
+     * @param phenotype matrix with the variables used and the evaluation 
+     *                  of the optimum phenotype to study
+     * @return 
+     */
     private static HashMap<String, Integer> getVariables(String[][] phenotype) {
         String[] lineVars = phenotype[0];
 
@@ -188,10 +215,47 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         return aux;
     }
 
-    //Method to get the logger from class SimpleGeneticAlgorithm
+    /**
+     * Method to get the logger from class SimpleGeneticAlgorithm
+     * @return asociated logger
+     */
     private static Logger GetSimpleGeneticAlgorithmLogger() {
         LogManager manager = LogManager.getLogManager();
         return manager.getLogger("jeco.core.algorithm.ga.SimpleGeneticAlgorithm");
     }
 
+    /**
+     * Method to get the initials arguments
+     * @param args arguments to read
+     * @return object CommandLine with the arguments readed
+     * @throws Exception 
+     */
+    private static CommandLine startUp(String[] args) throws Exception {
+        Options options = new Options();
+
+        Option grammar = new Option("c", CONFIGURATION, true, "configuration properties file path");
+        grammar.setRequired(true);
+        options.addOption(grammar);
+
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd;
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("utilityname", options);
+
+            System.exit(1);
+            return null;
+        }
+
+        String configurationFilePath = cmd.getOptionValue(CONFIGURATION);
+
+        Logger.getLogger(GrammaticalEvolution.class.getName())
+                .log(Level.INFO, "Configuration used: {0}", configurationFilePath);
+
+        return cmd;
+    }
 }

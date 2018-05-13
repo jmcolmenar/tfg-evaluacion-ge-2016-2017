@@ -70,4 +70,38 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <!-- Directories to create -->
+    <property name="mkdirGrammar.dir" value="dist/grammar"/>
+    <property name="mkdirTablas-entrada.dir" value="dist/tablas-entrada"/>
+    <property name="mdkirResources.dir" value="dist/resources"/>
+    
+    <!-- Directories from get copy -->
+    <property name="grammar.dir" value="grammar"/>
+    <property name="tablas-entrada.dir" value="tablas-entrada"/>
+    <property name="resources.dir" value="resources"/>
+    
+    <!-- Create directoies and copy needed files -->
+    <target name="-post-jar">
+        <!-- Grammar copy -->
+        <mkdir dir="${mkdirGrammar.dir}"/>
+        <copy todir="${mkdirGrammar.dir}">
+            <fileset dir="${grammar.dir}" includes="**/*.bnf">
+            </fileset>
+        </copy>
+        
+        <!-- Tablas-entrada copy -->
+        <mkdir dir="${mkdirTablas-entrada.dir}"/>
+        <copy todir="${mkdirTablas-entrada.dir}">
+            <fileset dir="${tablas-entrada.dir}" includes="**/*.csv">
+            </fileset>
+        </copy>
+        
+        <!-- Resources copy -->
+        <mkdir dir="${mdkirResources.dir}"/>        
+        <copy todir="${mdkirResources.dir}">
+            <fileset dir="${resources.dir}" includes="**/*.properties">
+            </fileset>
+        </copy>
+    </target>
 </project>
