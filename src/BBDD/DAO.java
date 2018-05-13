@@ -156,6 +156,15 @@ public class DAO {
                     + " values (?,?,?)");
 
             st.setString(1, configuration.idExperimento);
+            st.setString(2, EvaluationCofing.FITNESS_METHOD);
+            st.setString(3, String.valueOf(configuration.fitnessMethod));
+            st.execute();
+            
+            st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
+                    + "Propiedad, Valor)"
+                    + " values (?,?,?)");
+
+            st.setString(1, configuration.idExperimento);
             st.setString(2, EvaluationCofing.NUM_OF_OBJECTIVES);
             st.setString(3, String.valueOf(configuration.numOfObjetives));
             st.execute();
