@@ -5,6 +5,8 @@
  */
 package GE;
 
+import org.apache.commons.math3.stat.StatUtils;
+
 import java.util.Arrays;
 
 /**
@@ -141,6 +143,36 @@ public class Fitness {
 
         return ssr / yybar;
     }
+
+
+    /**
+     * Method to compute r^2.
+     *
+     * @param expected
+     * @param observed
+     * @return
+     */
+    public static double computeRSquare(double[] expected, double[] observed) {
+
+        // Implementing this method: https://support.office.com/es-es/article/COEFICIENTE-R2-funci%C3%B3n-COEFICIENTE-R2-d7161715-250d-4a01-b80d-a8364f2be08f
+        double avgE = StatUtils.mean(expected);
+        double avgO = StatUtils.mean(observed);
+
+        double acuNum = 0.0;
+        double acuE = 0.0;
+        double acuO = 0.0;
+
+        for (int i=0; i<expected.length; i++) {
+            acuNum += ((expected[i]-avgE) * (observed[i]-avgO));
+            acuE += Math.pow((expected[i]-avgE), 2);
+            acuO += Math.pow((observed[i]-avgO), 2);
+        }
+
+        double r = acuNum / Math.sqrt(acuE * acuO);
+
+        return Math.pow(r, 2);
+    }
+
     
     /**
      * Validate the value that should be set at solution
