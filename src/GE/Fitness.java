@@ -5,8 +5,6 @@
  */
 package GE;
 
-import org.apache.commons.math3.stat.StatUtils;
-
 import java.util.Arrays;
 
 /**
@@ -19,8 +17,9 @@ public class Fitness {
     private double[] prediction;
 
     /**
-     * The constructor convert the target and the prediction to the 
-     * same dimesion and length to be compared
+     * The constructor convert the target and the prediction to the same
+     * dimesion and length to be compared
+     *
      * @param target target preload
      * @param prediction prediction calculated
      */
@@ -39,6 +38,7 @@ public class Fitness {
 
     /**
      * Method to get the first colum from a matrix
+     *
      * @param matrix a matrix
      * @return return the array of the first column matrix
      */
@@ -52,6 +52,7 @@ public class Fitness {
 
     /**
      * Calculate the absolute acumulated error
+     *
      * @return fitness calculated
      */
     public double ABSAcumulated() {
@@ -69,6 +70,7 @@ public class Fitness {
 
     /**
      * Calculate the mean squared error
+     *
      * @return the fitness calculated
      */
     public double meanSquaredError() {
@@ -87,6 +89,7 @@ public class Fitness {
 
     /**
      * Calculate the Average error
+     *
      * @return the fitness calculated
      */
     public double averageError() {
@@ -102,80 +105,49 @@ public class Fitness {
 
         return totError / n;
     }
-    
+
     /**
      * Calculate the r² error
+     *
      * @return the fitness calculated
      */
     public double rSquared() {
-        if (target.length != prediction.length) {
-            throw new IllegalArgumentException("array lengths are not equal");
+        int n = this.target.length;
+
+        double average = 0;
+        for (int i = 0; i < this.target.length; i++) {
+            average = average + this.target[i];
         }
 
-        int n = target.length;
+        average = average / this.target.length;
 
-        // first pass
-        double sumx = 0.0, sumy = 0.0, sumx2 = 0.0;
-        for (int i = 0; i < n; i++) {
-            sumx += prediction[i];
-            sumx2 += prediction[i] * prediction[i];
-            sumy += target[i];
-        }
-        double xbar = sumx / n;
-        double ybar = sumy / n;
-
-        // second pass: compute summary statistics
-        double xxbar = 0.0, yybar = 0.0, xybar = 0.0;
-        for (int i = 0; i < n; i++) {
-            xxbar += (prediction[i] - xbar) * (prediction[i] - xbar);
-            yybar += (target[i] - ybar) * (target[i] - ybar);
-            xybar += (prediction[i] - xbar) * (target[i] - ybar);
-        }
-        double slope = xybar / xxbar;
-        double intercept = ybar - slope * xbar;
-
-        // more statistical analysis
-        double ssr = 0.0; // regression sum of squares
-        for (int i = 0; i < n; i++) {
-            double fit = slope * prediction[i] + intercept;
-            ssr += (fit - ybar) * (fit - ybar);
+        double[] firstErrSquared = new double[n];
+        for (int i = 0; i < this.target.length; i++) {
+            firstErrSquared[i] = Math.pow(this.target[i] - this.prediction[i], 2);
         }
 
-        return ssr / yybar;
+        double ssRes = 0;
+        for (int i = 0; i < firstErrSquared.length; i++) {
+            ssRes = ssRes + firstErrSquared[i];
+        }
+
+        double[] secondErrSquared = new double[n];
+        for (int i = 0; i < this.target.length; i++) {
+            secondErrSquared[i] = Math.pow(this.target[i] - average, 2);
+        }
+
+        double ssTot = 0;
+        for (int i = 0; i < secondErrSquared.length; i++) {
+            ssTot = ssTot + secondErrSquared[i];
+        }
+
+        double rSquared = 1 - (ssRes / ssTot);
+        return rSquared;
     }
 
-
-    /**
-     * Method to compute r^2.
-     *
-     * @param expected
-     * @param observed
-     * @return
-     */
-    public static double computeRSquare(double[] expected, double[] observed) {
-
-        // Implementing this method: https://support.office.com/es-es/article/COEFICIENTE-R2-funci%C3%B3n-COEFICIENTE-R2-d7161715-250d-4a01-b80d-a8364f2be08f
-        double avgE = StatUtils.mean(expected);
-        double avgO = StatUtils.mean(observed);
-
-        double acuNum = 0.0;
-        double acuE = 0.0;
-        double acuO = 0.0;
-
-        for (int i=0; i<expected.length; i++) {
-            acuNum += ((expected[i]-avgE) * (observed[i]-avgO));
-            acuE += Math.pow((expected[i]-avgE), 2);
-            acuO += Math.pow((observed[i]-avgO), 2);
-        }
-
-        double r = acuNum / Math.sqrt(acuE * acuO);
-
-        return Math.pow(r, 2);
-    }
-
-    
     /**
      * Validate the value that should be set at solution
+     *
      * @param method method used to calculate the fitness
      * @param n fitnes calculated previously
      * @return the value to be set as objective at solution
@@ -186,14 +158,10 @@ public class Fitness {
             return Double.POSITIVE_INFINITY;
         } else {
             double aux;
-            switch (method) {
-                // R2 best is 1, but we are minimizing
-                case "rSquared":
-                    aux = (1.0 - n);
-                    break;
-                default:
-                    aux = n;
-                    break;
+            if (n < 0) {
+                aux = Double.POSITIVE_INFINITY;
+            } else {
+                aux = n;
             }
             return aux;
         }
@@ -201,6 +169,7 @@ public class Fitness {
 
     /**
      * This a simple fitness to test
+     *
      * @return the fitness calculated
      */
     public double test() {

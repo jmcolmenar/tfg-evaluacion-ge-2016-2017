@@ -68,7 +68,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             double funcI;
             try {
                 String aux = this.evaluator.evaluate(currentFunction);
-                if (aux.equals("NaN")) {//TODO revisar valores menores que 0
+                if (aux.equals("NaN")) {
                     funcI = Double.POSITIVE_INFINITY;
                 } else {
                     funcI = Double.valueOf(aux);
@@ -188,6 +188,8 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
             algorithm.initialize();
             Solutions<Variable<Integer>> solutions = algorithm.execute();
+            
+            Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save results for ID_Experimento: {0}", configuration.idExperimento);
             for (Solution<Variable<Integer>> solution : solutions) {
                 //Save to BBDD the solution
                 dao.saveResult(configuration.idExperimento, run, solution, problem);

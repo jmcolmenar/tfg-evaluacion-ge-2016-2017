@@ -70,7 +70,7 @@ public class DAO {
 
     public void createTables() {
         try {
-            Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Create init tables");
+            Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Create init tables (if not exists)");
 
             PreparedStatement st;
             st = connect.prepareStatement("CREATE TABLE IF NOT EXISTS Experimentos ("
@@ -256,8 +256,6 @@ public class DAO {
 
     public void saveResult(String ID_Experimento, int run, Solution<Variable<Integer>> solution, GrammaticalEvolution problem) {
         try {
-            Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save result for ID_Experimento: {0}", ID_Experimento);
-
             PreparedStatement st
                     = connect.prepareStatement("insert into Resultados (ID_Experimento, Run,"
                             + "Genotipo, Fenotipo, Evaluacion, Fitness, GenesUsados)"
