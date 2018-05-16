@@ -1,0 +1,10 @@
+<func>  ::= <expr1>
+<expr1> ::= <expr> <op> <expr> <op> <expr> <op> <expr> 
+            | <expr> <op> <expr> <op> <expr>
+<expr>  ::= <cte> 
+            | <var> 
+            | <expr> <op> <expr>
+<op>    ::= +|-|/|*
+<var>   ::= X|Z|T|P|R|Q|S|V|U|K
+<cte>   ::= <digit><digit>.<digit><digit>
+<digit> ::= 0|1|2|3|4|5|6|7|8|9

@@ -111,8 +111,9 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         while (iterator.hasNext()) {
             Map.Entry pair = (Map.Entry) iterator.next();
             String key = pair.getKey().toString().toUpperCase();
+            String regex = "(" + key + ")(?!\\d)";
             int keyPosition = Integer.parseInt(pair.getValue().toString());
-            newFunction = newFunction.replace(key, func[index][keyPosition]);
+            newFunction = newFunction.replaceAll(regex, func[index][keyPosition]);
         }
         return newFunction;
     }
