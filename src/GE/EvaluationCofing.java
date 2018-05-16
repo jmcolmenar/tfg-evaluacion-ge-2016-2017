@@ -33,7 +33,7 @@ public class EvaluationCofing {
     public static final String SENSIBLE_INIT_PERCENTILE = "Sensible_init_percentile";
 
     //Algorithm const
-    public static final String MAX_POPULATION_SIZE = "Max_pupulation_size";
+    public static final String MAX_POPULATION_SIZE = "Max_population_size";
     public static final String MAX_GENERATIONS = "Max_generations";
     public static final String PROB_MUTATION = "Prob_mutation";
     public static final String PROB_CROSSOVER = "Prob_crossover";
