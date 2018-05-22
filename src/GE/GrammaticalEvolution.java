@@ -8,7 +8,9 @@ package GE;
 import BBDD.DAO;
 import BBDD.JDBCLogHandler;
 import Import.CSVReader;
+import Observers.GenerationObserver;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import jeco.core.algorithm.ga.SimpleGeneticAlgorithm;
 import jeco.core.algorithm.ge.SimpleGrammaticalEvolution;
 import jeco.core.algorithm.moge.AbstractProblemGE;
 import jeco.core.algorithm.moge.Phenotype;
@@ -180,12 +183,17 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         Logger sgaLogger = GetSimpleGeneticAlgorithmLogger();
         sgaLogger.addHandler(jdbcHandler);
 
+        //Setup observers
+        GenerationObserver go = setGenerationObserver(algorithm);
+
         for (int i = 0; i < configuration.runs; i++) {
             //Set run
             int run = i + 1;
             jdbcHandler.setRun(run);
 
-            logger.info(String.format("Init run: %s", (i + 1)));
+            logger.info(String.format("Init run: %s", run));
+            
+            go.resetObserver();
 
             algorithm.initialize();
             Solutions<Variable<Integer>> solutions = algorithm.execute();
@@ -197,6 +205,8 @@ public class GrammaticalEvolution extends AbstractProblemGE {
                 logger.info(String.format("Fitness = (%s)", solution.getObjectives().get(0)));
                 logger.info(String.format("Phenotype = (%s)", problem.generatePhenotype(solution).toString()));
             }
+            dao.saveBestGenerationObjective(configuration.idExperimento, run, go.getBestObjectives());
+            logger.info(String.format("Finished run: %s", run));
         }
         //Close database connection
         dao.close();
@@ -260,5 +270,22 @@ public class GrammaticalEvolution extends AbstractProblemGE {
                 .log(Level.INFO, "Configuration used: {0}", configurationFilePath);
 
         return cmd;
+    }
+    
+    /**
+     * Method to setup the generation observer
+     * @param algorithm SimpleGrammaticalEvolution object
+     * @throws NoSuchFieldException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException 
+     */
+    private static GenerationObserver setGenerationObserver(SimpleGrammaticalEvolution algorithm) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
+        //generation observer
+        GenerationObserver go = new GenerationObserver(configuration.maxGenerations);
+        Field f = algorithm.getClass().getDeclaredField("algorithm"); //NoSuchFieldException
+        f.setAccessible(true);
+        SimpleGeneticAlgorithm<Variable<Integer>> ga = (SimpleGeneticAlgorithm<Variable<Integer>>) f.get(algorithm);
+        ga.addObserver(go);
+        return go;
     }
 }

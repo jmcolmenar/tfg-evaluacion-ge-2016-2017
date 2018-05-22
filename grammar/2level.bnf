@@ -4,7 +4,11 @@
 <expr>  ::= <cte> 
             | <var> 
             | <expr> <op> <expr>
+            | <preop>(<expr>)
+            | <pow>
 <op>    ::= +|-|/|*
 <var>   ::= X|Z|T|P|R|Q|S|V|U|K
 <cte>   ::= <digit><digit>.<digit><digit>
 <digit> ::= 0|1|2|3|4|5|6|7|8|9
+<preop> ::= sin|cos
+<pow> ::= pow(<var>,<cte>)
