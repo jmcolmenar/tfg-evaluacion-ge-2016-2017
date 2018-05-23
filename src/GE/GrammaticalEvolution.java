@@ -67,10 +67,11 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
         //Evaluation from phenotype
         for (int i = 1; i < func.length; i++) {
-            String currentFunction = calculateFunctionValued(originalFunction, i);
+            //String currentFunction = calculateFunctionValued(originalFunction, i);
+            setEvaluationVars(i);
             double funcI;
             try {
-                String aux = this.evaluator.evaluate(currentFunction);
+                String aux = this.evaluator.evaluate(originalFunction);
                 if (aux.equals("NaN")) {
                     funcI = Double.POSITIVE_INFINITY;
                 } else {
@@ -119,6 +120,23 @@ public class GrammaticalEvolution extends AbstractProblemGE {
             newFunction = newFunction.replaceAll(regex, func[index][keyPosition]);
         }
         return newFunction;
+    }
+    
+    /**
+     * Method to set the variables for the next evaluation
+     * @param index idex of func matrix
+     */
+    private void setEvaluationVars(int index){
+        evaluator.clearVariables();
+        
+        Iterator iterator = vars.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            String key = pair.getKey().toString();
+            int keyPosition = Integer.parseInt(pair.getValue().toString());
+            String value = func[index][keyPosition];
+            evaluator.putVariable(key, value);
+        }        
     }
 
     @Override
@@ -223,7 +241,7 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
         HashMap<String, Integer> aux = new HashMap<>();
         for (int i = 1; i < lineVars.length; i++) {
-            aux.put(lineVars[i], i);
+            aux.put(lineVars[i].toUpperCase(), i);
         }
         return aux;
     }
