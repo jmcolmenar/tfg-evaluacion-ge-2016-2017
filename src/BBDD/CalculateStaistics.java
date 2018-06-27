@@ -105,13 +105,32 @@ public class CalculateStaistics {
         /**
          * Method to create a file from string
          * @param s string to copy at file
+         * @param path route to create file
          * @throws FileNotFoundException 
          */
-        private static void writeCSV(String s) throws FileNotFoundException {
-            try (PrintWriter out = new PrintWriter("filename.csv")) {
+        private static void writeCSV(String s, String path) throws FileNotFoundException {
+            try (PrintWriter out = new PrintWriter(path)) {
                 out.println(s);
             }
-        } 
+        }
+        
+        /**
+         * Method to calculate the CSV path against database
+         * @param path database path
+         * @param name nambe of CSV
+         * @return route
+         */
+        private static String getCSVpath(String path, String name){
+            String aux = path;
+            for(int i=aux.length()-1; i>0; i--){
+                if(path.charAt(i) == '/')
+                    break;
+                else
+                    aux = aux.substring(0, i);
+            }
+            
+            return aux + name;
+        }
     }
 
     private static final String DATABASE = "database";
@@ -123,26 +142,36 @@ public class CalculateStaistics {
         /*CommandLine cmd = startUp(args);
         
         String db = cmd.getOptionValue(DATABASE);
-        String exp = cmd.getOptionValue(EXPERIMENTID);
-         */
-        
-        
-        String db = "/home/cgm02/tfg/old/old_resultados/estudios.db";;
+        String exp = cmd.getOptionValue(EXPERIMENTID);*/
+        String db ="/home/cgm02/pruebas db/estudios.db";
         String exp = "fit_ABSAcumulated";
 
-        //todo CREAR TABLA ESTADISTICAS
-        
+        //Connect to database       
         DAO dao = new DAO();
         connect = dao.connect(db);
-
-        fitnessByGeneration(exp);
-        bestFitnessLastGeneration(exp);
-
+        
+        //create table Estadisticas if not exists
+        createTable();
+        
+        //reset experiment to recalculate
         resetExperiment(exp);
+        
+        //calculate staistics
+        String nameFbyG = exp + "_FbyG.csv";
+        String pathFbyG = Utilities.getCSVpath(db, nameFbyG);
+        fitnessByGeneration(exp, pathFbyG);
+        
         pctInfinityNaN(exp);
+        
         timeByExperiment(exp);
+        
         numberFoundOptimal(exp);
         
+        bestFitnessLastGeneration(exp);
+        
+        //TODO show results
+        
+        //close connection
         dao.close();
     }
 
@@ -189,6 +218,23 @@ public class CalculateStaistics {
 
         return cmd;
     }
+    
+    private static void createTable(){
+        Logger.getLogger(CalculateStaistics.class.getName()).log(Level.INFO, "Create table if not exists Estadisticas");
+        try {
+            PreparedStatement st;
+            st = connect.prepareStatement(  "CREATE TABLE IF NOT EXISTS Estadisticas (\n" +
+                                            "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n" +
+                                            "ID_Experimento TEXT NOT NULL,\n" +
+                                            "Tiempo FLOAT NULL,\n" +
+                                            "PctOptimos FLOAT NULL,\n" +
+                                            "PctInfNaN INTEGER NULL\n" +
+                                            ");");
+            st.execute();
+        } catch (SQLException ex) {
+            Logger.getLogger(CalculateStaistics.class.getName()).log(Level.SEVERE, ex.getMessage());
+        }
+    }
 
     /**
      * Method to reset the previous calculated staistics
@@ -212,9 +258,10 @@ public class CalculateStaistics {
     /**
      * Method to create the CSV file of fitness by generation
      * @param experimentID experiment name to use
+     * @param path route to save the result
      * @throws FileNotFoundException 
      */
-    private static void fitnessByGeneration(String experimentID) throws FileNotFoundException {
+    private static void fitnessByGeneration(String experimentID, String path) throws FileNotFoundException {
         Logger.getLogger(CalculateStaistics.class.getName()).log(Level.INFO, "Creating csv fitness By Generationfor ID_EXPERIMENTO: {0}", experimentID);
         try {
             PreparedStatement st;
@@ -242,10 +289,10 @@ public class CalculateStaistics {
             for (int i = 0; i < fitGen.length; i++) {
                 fitGen[i] = fitGen[i] / runs;
             }
-
+            
             String csv = "Generacion;Optimo\n" + Utilities.stringToCSV(fitGen);
             
-            Utilities.writeCSV(csv);
+            Utilities.writeCSV(csv, path);
 
         } catch (SQLException ex) {
             Logger.getLogger(CalculateStaistics.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -374,6 +421,8 @@ public class CalculateStaistics {
             String training = getTraining(experimentID);
             CSVReader csv = new CSVReader(training);
             String[][] func = csv.loadMatrix();
+            if (func.length == 0)
+                throw new Exception("Invalid path '" + training + "' to load training");
 
             st = connect.prepareStatement(  "select r.fenotipo as Fenotipo,\n" +
                                             "r.Evaluacion as Evaluacion\n" +
@@ -420,6 +469,8 @@ public class CalculateStaistics {
             //TODO guardar en estadisticas BBDD
         
         } catch (SQLException ex) {
+            Logger.getLogger(CalculateStaistics.class.getName()).log(Level.SEVERE, ex.getMessage());
+        } catch (Exception ex) {
             Logger.getLogger(CalculateStaistics.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }       
