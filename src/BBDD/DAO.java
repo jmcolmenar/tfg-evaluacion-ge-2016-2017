@@ -5,8 +5,8 @@
  */
 package BBDD;
 
-import GE.EvaluationCofing;
-import GE.GrammaticalEvolution;
+import Experiment.EvaluationCofing;
+import Experiment.GrammaticalEvolution;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

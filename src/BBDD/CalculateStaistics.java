@@ -5,9 +5,9 @@
  */
 package BBDD;
 
-import GE.Fitness;
-import GE.GrammaticalEvolution;
-import Import.CSVReader;
+import Experiment.Fitness;
+import Experiment.GrammaticalEvolution;
+import FileRepository.CSVReader;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.Connection;

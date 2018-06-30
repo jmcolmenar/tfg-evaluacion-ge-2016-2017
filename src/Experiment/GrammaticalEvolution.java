@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package GE;
+package Experiment;
 
 import BBDD.DAO;
 import BBDD.JDBCLogHandler;
-import Import.CSVReader;
-import Import.VariablesReader;
+import FileRepository.CSVReader;
+import FileRepository.VariablesReader;
 import Observers.GenerationObserver;
 import java.io.IOException;
 import java.lang.reflect.Field;

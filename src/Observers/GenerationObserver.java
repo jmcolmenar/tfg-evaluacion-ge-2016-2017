@@ -23,7 +23,6 @@ public class GenerationObserver implements Observer{
     private final int lentgh;
     
     public GenerationObserver(int length){
-        //this.bestOjectives = new Double[length];
         this.lentgh = length;
     }
     
@@ -34,6 +33,10 @@ public class GenerationObserver implements Observer{
                 = Double.parseDouble(auxMap.get(BESTOBJECTIVE));
     }
     
+    /**
+     * Method to get the best objectives saved
+     * @return return the best objectives in a matrix
+     */
     public Double[] getBestObjectives(){
         Double[] aux = Arrays.stream(this.bestOjectives)
                      .filter(s -> (s != null))
@@ -41,6 +44,9 @@ public class GenerationObserver implements Observer{
         return aux;
     }
     
+    /**
+     * Method to reset the Observer to start a new run
+     */
     public void resetObserver(){
         this.bestOjectives = new Double[this.lentgh];
     }
