@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package BBDD;
+package Database;
 
 import Experiment.EvaluationCofing;
 import Experiment.GrammaticalEvolution;
@@ -148,8 +148,7 @@ public class DAO {
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, "Grammar");
-            String[] grammarList = configuration.grammar.split("/");
-            st.setString(3, grammarList[grammarList.length - 1]);
+            st.setString(3, String.valueOf(configuration.grammar));
             st.execute();
 
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
@@ -158,8 +157,7 @@ public class DAO {
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, "Training");
-            String[] trainingList = configuration.training.split("/");
-            st.setString(3, trainingList[trainingList.length - 1]);
+            st.setString(3, String.valueOf(configuration.training));
             st.execute();
 
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "

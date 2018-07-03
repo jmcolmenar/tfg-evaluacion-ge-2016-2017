@@ -5,11 +5,11 @@
  */
 package Experiment;
 
-import BBDD.DAO;
-import BBDD.JDBCLogHandler;
+import Database.DAO;
+import Database.JDBCLogHandler;
 import FileRepository.CSVReader;
 import FileRepository.VariablesReader;
-import Observers.GenerationObserver;
+import Experiment.Observers.GenerationObserver;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

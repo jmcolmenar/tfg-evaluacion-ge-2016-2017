@@ -141,7 +141,7 @@ public class Fitness {
             ssTot = ssTot + secondErrSquared[i];
         }
 
-        double rSquared = 1 - (ssRes / ssTot);
+        double rSquared = (ssRes / ssTot);
         return rSquared;
     }
 
