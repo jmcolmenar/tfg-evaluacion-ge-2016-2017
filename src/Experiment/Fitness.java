@@ -73,7 +73,7 @@ public class Fitness {
      *
      * @return the fitness calculated
      */
-    public double meanSquaredError() {
+    public double rootMeanSquaredError() {
         if (target.length != prediction.length) {
             throw new IllegalArgumentException("array lengths are not equal");
         }
