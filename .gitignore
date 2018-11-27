@@ -38,3 +38,4 @@ dist/
 nbdist/
 .nb-gradle/
 .idea/libraries/commons_cli_1_4.xml
+.DS_Store
