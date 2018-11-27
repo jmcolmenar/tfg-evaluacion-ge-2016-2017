@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package GE;
+package Experiment;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import net.sourceforge.jeval.EvaluationException;
 
 /**
  *
@@ -63,10 +62,9 @@ public class EvaluationCofing {
     /**
      * Method to load the configuration to the algorithm and problem.
      * @param path route to cnfiguration.properties file
-     * @throws IOException
-     * @throws EvaluationException 
+     * @throws IOException 
      */
-    public EvaluationCofing(String path) throws IOException, EvaluationException {
+    public EvaluationCofing(String path) throws IOException {
         Properties conf = loadProperties(path);
 
         //experiment configuration

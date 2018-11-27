@@ -3,12 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package GE;
+package Experiment;
 
-import BBDD.DAO;
-import BBDD.JDBCLogHandler;
-import Import.CSVReader;
+import Database.DAO;
+import Database.JDBCLogHandler;
+import FileRepository.CSVReader;
+import FileRepository.VariablesReader;
+import Experiment.Observers.GenerationObserver;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -18,14 +21,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import jeco.core.algorithm.ga.SimpleGeneticAlgorithm;
 import jeco.core.algorithm.ge.SimpleGrammaticalEvolution;
 import jeco.core.algorithm.moge.AbstractProblemGE;
 import jeco.core.algorithm.moge.Phenotype;
 import jeco.core.problem.Solution;
 import jeco.core.problem.Solutions;
 import jeco.core.problem.Variable;
-import net.sourceforge.jeval.EvaluationException;
-import net.sourceforge.jeval.Evaluator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -33,25 +35,28 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import parsii.eval.Expression;
+import parsii.eval.Parser;
+import parsii.eval.Scope;
 
 /**
  *
  * @author Carlos García Moreno
  */
 public class GrammaticalEvolution extends AbstractProblemGE {
-    
+
     private static final String CONFIGURATION = "configuration";
 
     private static final Logger logger = Logger.getLogger(GrammaticalEvolution.class.getName());
-    protected Evaluator evaluator;
     protected static String[][] func;
     private static EvaluationCofing configuration;
     private static HashMap<String, Integer> vars = new HashMap<String, Integer>();
+    private Scope scope;
 
-    public GrammaticalEvolution(String pathToBnf) {
+    public GrammaticalEvolution(String pathToBnf) throws IOException {
         super(pathToBnf, configuration.numOfObjetives, configuration.chromosomelength, configuration.maxCntWrappings, configuration.codonUpperBound);
         this.setSensibleInitialization(configuration.siValue, configuration.siPercentile);
-        this.evaluator = new Evaluator();
+        setupScope(configuration.grammar);
     }
 
     @Override
@@ -64,18 +69,24 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
         //Evaluation from phenotype
         for (int i = 1; i < func.length; i++) {
-            String currentFunction = calculateFunctionValued(originalFunction, i);
+            setEvaluationVars(i);
             double funcI;
-            try {
-                String aux = this.evaluator.evaluate(currentFunction);
-                if (aux.equals("NaN")) {
+                try {
+                    Expression expr = Parser.parse(originalFunction, this.scope);
+                    funcI = expr.evaluate();
+                    if (Double.isNaN(funcI)) {
+                        funcI = Double.POSITIVE_INFINITY;
+                    }
+                } catch (parsii.tokenizer.ParseException ex) {
+                    //Invalid phenotype
                     funcI = Double.POSITIVE_INFINITY;
-                } else {
-                    funcI = Double.valueOf(aux);
+                    for (int z = i; z<func.length; z++){
+                        prediction[z] = String.valueOf(funcI);
+                        solution.getProperties().put(String.valueOf(z), (double) funcI);
+                    }
+                    break;
                 }
-            } catch (EvaluationException ex) {
-                funcI = Double.POSITIVE_INFINITY;
-            }
+
             //Add to prediction array the evaluation calculated
             prediction[i] = String.valueOf(funcI);
             solution.getProperties().put(String.valueOf(i), (double) funcI);
@@ -98,40 +109,41 @@ public class GrammaticalEvolution extends AbstractProblemGE {
     }
 
     /**
-     * Method to replace the unknowns variables by values
-     * @param originalFunction function of unknowns variables
-     * @param index index of func matrix, indicate the index 
-     *              of value used at previous evaluation
-     * @return function with the knowns values to be evaluated
+     * Method to set the variables for the next evaluation
+     *
+     * @param index idex of func matrix
      */
-    private String calculateFunctionValued(String originalFunction, int index) {
-        String newFunction = originalFunction;
+    private void setEvaluationVars(int index) {
 
         Iterator iterator = vars.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry pair = (Map.Entry) iterator.next();
-            String key = pair.getKey().toString().toUpperCase();
-            String regex = "(" + key + ")(?!\\d)";
+            String key = pair.getKey().toString();
             int keyPosition = Integer.parseInt(pair.getValue().toString());
-            newFunction = newFunction.replaceAll(regex, func[index][keyPosition]);
+            double value = Double.parseDouble(func[index][keyPosition]);
+            this.scope.getVariable(key).withValue(value);
         }
-        return newFunction;
     }
 
     @Override
     public GrammaticalEvolution clone() {
-        GrammaticalEvolution clone = new GrammaticalEvolution(super.pathToBnf);
+        GrammaticalEvolution clone = null;
+        try {
+            clone = new GrammaticalEvolution(super.pathToBnf);
+        } catch (IOException ex) {
+            Logger.getLogger(GrammaticalEvolution.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return clone;
     }
 
     /**
      * Main method who control the executino of algorithm
+     *
      * @param args arguments to init the algorithm
-     * @throws EvaluationException
      * @throws IOException
-     * @throws Exception 
+     * @throws Exception
      */
-    public static void main(String[] args) throws EvaluationException, IOException, Exception {
+    public static void main(String[] args) throws IOException, Exception {
         //Load properties configuration
         CommandLine cmd = startUp(args);
         configuration = new EvaluationCofing(cmd.getOptionValue(CONFIGURATION));
@@ -180,16 +192,21 @@ public class GrammaticalEvolution extends AbstractProblemGE {
         Logger sgaLogger = GetSimpleGeneticAlgorithmLogger();
         sgaLogger.addHandler(jdbcHandler);
 
+        //Setup observers
+        GenerationObserver go = setGenerationObserver(algorithm);
+
         for (int i = 0; i < configuration.runs; i++) {
             //Set run
             int run = i + 1;
             jdbcHandler.setRun(run);
 
-            logger.info(String.format("Init run: %s", (i + 1)));
+            logger.info(String.format("Init run: %s", run));
+
+            go.resetObserver();
 
             algorithm.initialize();
             Solutions<Variable<Integer>> solutions = algorithm.execute();
-            
+
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save results for ID_Experimento: {0}", configuration.idExperimento);
             for (Solution<Variable<Integer>> solution : solutions) {
                 //Save to BBDD the solution
@@ -197,6 +214,8 @@ public class GrammaticalEvolution extends AbstractProblemGE {
                 logger.info(String.format("Fitness = (%s)", solution.getObjectives().get(0)));
                 logger.info(String.format("Phenotype = (%s)", problem.generatePhenotype(solution).toString()));
             }
+            dao.saveBestGenerationObjective(configuration.idExperimento, run, go.getBestObjectives());
+            logger.info(String.format("Finished run: %s", run));
         }
         //Close database connection
         dao.close();
@@ -204,22 +223,24 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
     /**
      * Method to get the variables used to study
-     * @param phenotype matrix with the variables used and the evaluation 
-     *                  of the optimum phenotype to study
-     * @return 
+     *
+     * @param phenotype matrix with the variables used and the evaluation of the
+     * optimum phenotype to study
+     * @return
      */
     private static HashMap<String, Integer> getVariables(String[][] phenotype) {
         String[] lineVars = phenotype[0];
 
         HashMap<String, Integer> aux = new HashMap<>();
         for (int i = 1; i < lineVars.length; i++) {
-            aux.put(lineVars[i], i);
+            aux.put(lineVars[i].toUpperCase(), i);
         }
         return aux;
     }
 
     /**
      * Method to get the logger from class SimpleGeneticAlgorithm
+     *
      * @return asociated logger
      */
     private static Logger GetSimpleGeneticAlgorithmLogger() {
@@ -229,9 +250,10 @@ public class GrammaticalEvolution extends AbstractProblemGE {
 
     /**
      * Method to get the initials arguments
+     *
      * @param args arguments to read
      * @return object CommandLine with the arguments readed
-     * @throws Exception 
+     * @throws Exception
      */
     private static CommandLine startUp(String[] args) throws Exception {
         Options options = new Options();
@@ -260,5 +282,39 @@ public class GrammaticalEvolution extends AbstractProblemGE {
                 .log(Level.INFO, "Configuration used: {0}", configurationFilePath);
 
         return cmd;
+    }
+
+    /**
+     * Method to setup the generation observer
+     *
+     * @param algorithm SimpleGrammaticalEvolution object
+     * @throws NoSuchFieldException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     */
+    private static GenerationObserver setGenerationObserver(SimpleGrammaticalEvolution algorithm) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        //generation observer
+        GenerationObserver go = new GenerationObserver(configuration.maxGenerations);
+        Field f = algorithm.getClass().getDeclaredField("algorithm"); //NoSuchFieldException
+        f.setAccessible(true);
+        SimpleGeneticAlgorithm<Variable<Integer>> ga = (SimpleGeneticAlgorithm<Variable<Integer>>) f.get(algorithm);
+        ga.addObserver(go);
+        return go;
+    }
+
+    /**
+     * Method to read the grammar variables and setup an initial start to evaluation
+     * @param path grammar file path
+     * @throws IOException 
+     */
+    private void setupScope(String path) throws IOException {
+        VariablesReader vReader = new VariablesReader(path);        
+        String[] arrayVariables = vReader.read();
+        
+        this.scope = new Scope();
+        
+        for (String arrayVariable : arrayVariables) {
+            this.scope.getVariable(arrayVariable).withValue(Double.POSITIVE_INFINITY);
+        }
     }
 }

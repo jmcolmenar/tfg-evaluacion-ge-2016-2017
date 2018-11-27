@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package BBDD;
+package Database;
 
-import GE.EvaluationCofing;
-import GE.GrammaticalEvolution;
+import Experiment.EvaluationCofing;
+import Experiment.GrammaticalEvolution;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -31,11 +31,16 @@ public class DAO {
 
     Connection connect;
 
-    public Connection connect(String url) {
+    /**
+      * Method to entablish a connection database.
+      * @param path database route
+      * @return the connection to database
+      */
+    public Connection connect(String path) {
         try {
-            connect = DriverManager.getConnection("jdbc:sqlite:" + url);
+            connect = DriverManager.getConnection("jdbc:sqlite:" + path);
             if (connect != null) {
-                Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Connected to: {0}", url);
+                Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Connected to: {0}", path);
             }
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, "Unable to connect to the database {0}", ex.getMessage());
@@ -43,6 +48,9 @@ public class DAO {
         return connect;
     }
 
+    /**
+     * Method to close a connection database.
+     */
     public void close() {
         try {
             connect.close();
@@ -51,7 +59,9 @@ public class DAO {
         }
     }
 
-    //TODO si no existen las tablas crearlas y si existen dejarlas o que¿?
+    /**
+     * Method to drop the created tables.
+     */
     public void dropTables() {
         try {
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Drop tables");
@@ -63,11 +73,17 @@ public class DAO {
 
             st = connect.prepareStatement("DROP TABLE  if exists Logs;");
             st.execute();
+            
+            st = connect.prepareStatement("DROP TABLE  if exists Generaciones;");
+            st.execute();
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
 
+    /**
+     * Method to create tables if not exists.
+     */
     public void createTables() {
         try {
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Create init tables (if not exists)");
@@ -102,11 +118,24 @@ public class DAO {
                     + "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP );"
             );
             st.execute();
+            
+            st = connect.prepareStatement("CREATE TABLE IF NOT EXISTS Generaciones ("
+                    + "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                    + "ID_Experimento TEXT NOT NULL,"
+                    + "Run INTEGER NOT NULL,"
+                    + "Generacion INTEGER NOT NULL,"
+                    + "Optimo DOUBLE NOT NULL);"
+            );
+            st.execute();
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
 
+    /**
+     * Method to sabe the configuration of experiment.
+     * @param configuration experiment configuration
+     */
     public void saveExperiment(EvaluationCofing configuration) {
         try {
             Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save experiment as ID_Experimento: {0}", configuration.idExperimento);
@@ -119,8 +148,7 @@ public class DAO {
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, "Grammar");
-            String[] grammarList = configuration.grammar.split("/");
-            st.setString(3, grammarList[grammarList.length - 1]);
+            st.setString(3, String.valueOf(configuration.grammar));
             st.execute();
 
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
@@ -129,8 +157,7 @@ public class DAO {
 
             st.setString(1, configuration.idExperimento);
             st.setString(2, "Training");
-            String[] trainingList = configuration.training.split("/");
-            st.setString(3, trainingList[trainingList.length - 1]);
+            st.setString(3, String.valueOf(configuration.training));
             st.execute();
 
             st = connect.prepareStatement("insert into Experimentos (ID_Experimento, "
@@ -254,14 +281,21 @@ public class DAO {
         }
     }
 
-    public void saveResult(String ID_Experimento, int run, Solution<Variable<Integer>> solution, GrammaticalEvolution problem) {
+    /**
+     * Method to save the results of experiment
+     * @param id_Experimento experiment identifier
+     * @param run number of execution
+     * @param solution solution to save
+     * @param problem problem to save
+     */
+    public void saveResult(String id_Experimento, int run, Solution<Variable<Integer>> solution, GrammaticalEvolution problem) {
         try {
             PreparedStatement st
                     = connect.prepareStatement("insert into Resultados (ID_Experimento, Run,"
                             + "Genotipo, Fenotipo, Evaluacion, Fitness, GenesUsados)"
                             + " values (?,?,?,?,?,?,?)");
 
-            st.setString(1, ID_Experimento);
+            st.setString(1, id_Experimento);
             st.setInt(2, run);
             st.setString(3, genotypeToString(solution.getVariables()));
             st.setString(4, problem.generatePhenotype(solution).toString());
@@ -274,22 +308,40 @@ public class DAO {
         }
     }
 
+    /**
+     * Method to check if exists an experiment
+     * @param id_Experimento experiment identifier
+     * @return 0 if not exists; >0 if exists
+     */
     public boolean existsID_Experimento(String id_Experimento) {
         Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Searching ID_Experimento: " + id_Experimento);
 
-        ResultSet result = null;
-        int existe = 0;
+        PreparedStatement st;
+        ResultSet result;
+        int existsTable = 0;
+        int existsExperiment = 0;
         try {
-            PreparedStatement st = connect.prepareStatement("select count(*) as existe from Experimentos where ID_Experimento = '" + id_Experimento + "'");
+            st = connect.prepareStatement("SELECT count(*) as existe FROM sqlite_master WHERE type='table' AND name='Experimentos'");
             result = st.executeQuery();
-            existe = result.getInt("existe");
+            existsTable = result.getInt("existe");
+            
+            if (existsTable > 0){
+                st = connect.prepareStatement("select count(*) as existe from Experimentos where ID_Experimento = '" + id_Experimento + "'");
+                result = st.executeQuery();
+                existsExperiment = result.getInt("existe");
+            }
         } catch (SQLException ex) {
             Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
-        return (existe > 0);
+        return (existsExperiment > 0);
     }
 
+    /**
+     * Transforme a genotpe to string by ; separated value
+     * @param variables
+     * @return comma separated string
+     */
     private String genotypeToString(ArrayList<Variable<Integer>> variables) {
         String result = "";
         for (Variable<Integer> variable : variables) {
@@ -298,6 +350,11 @@ public class DAO {
         return result.substring(0, result.length() - 1);
     }
 
+    /**
+     * Transforme an evaluation map to string by ; separated value
+     * @param h hashmpa of evaluations
+     * @return comma separated string
+     */
     private String evaluationToString(HashMap<String, Number> h) {
 
         Comparator<String> comparator = new Comparator<String>() {
@@ -320,6 +377,33 @@ public class DAO {
             return result.substring(0, result.length() - 1);
         } else {
             return "Invalid phenotype";
+        }
+    }
+    
+    /**
+     * Save the best objectives by generation
+     * @param id_Experimento experiment identifier
+     * @param run number of execution
+     * @param array array of objectives by generation
+     */
+    public void saveBestGenerationObjective(String id_Experimento, int run, Double[] array){
+        Logger.getLogger(DAO.class.getName()).log(Level.INFO, "Save better goal by generation, ID_EXPERIMENTO: " + id_Experimento);
+        
+        PreparedStatement st;
+        try {            
+            for (int i = 0; i < array.length; i++){
+                st = connect.prepareStatement("insert into Generaciones(ID_Experimento, Run,"
+                            + "Generacion, Optimo)"
+                            + " values (?,?,?,?)");
+                
+            st.setString(1, id_Experimento);
+            st.setInt(2, run);
+            st.setInt(3, i);
+            st.setDouble(4, array[i]);
+            st.execute();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DAO.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
 }

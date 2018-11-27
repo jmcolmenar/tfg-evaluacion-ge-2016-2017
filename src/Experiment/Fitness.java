@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package GE;
+package Experiment;
 
 import java.util.Arrays;
 
@@ -73,7 +73,7 @@ public class Fitness {
      *
      * @return the fitness calculated
      */
-    public double meanSquaredError() {
+    public double rootMeanSquaredError() {
         if (target.length != prediction.length) {
             throw new IllegalArgumentException("array lengths are not equal");
         }
@@ -141,7 +141,7 @@ public class Fitness {
             ssTot = ssTot + secondErrSquared[i];
         }
 
-        double rSquared = 1 - (ssRes / ssTot);
+        double rSquared = (ssRes / ssTot);
         return rSquared;
     }
 
